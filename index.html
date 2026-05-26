@@ -1897,7 +1897,7 @@ async function sendMagicLink() {
   try {
     const { error } = await sb.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.origin, shouldCreateUser: true }
+      options: { emailRedirectTo: window.location.origin + '/', shouldCreateUser: true }
     });
     if (error) {
       console.error('Magic link error:', error);
