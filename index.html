@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>wallet os</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="icon" href="walletos-logo.png" type="image/png"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "primary": "#ad2b00",
+        "primary-container": "#ff7853",
+        "primary-fixed": "#ff7853",
+        "primary-fixed-dim": "#ff5d2f",
+        "primary-dim": "#982400",
+        "on-primary": "#ffefec",
+        "on-primary-container": "#480c00",
+        "on-primary-fixed": "#000000",
+        "on-primary-fixed-variant": "#591100",
+        "inverse-primary": "#ff5626",
+        "surface-tint": "#ad2b00",
+        "secondary": "#605a57",
+        "secondary-container": "#e9e1dc",
+        "secondary-fixed": "#e9e1dc",
+        "secondary-fixed-dim": "#dbd3ce",
+        "secondary-dim": "#544f4b",
+        "on-secondary": "#faf1ec",
+        "on-secondary-container": "#56514d",
+        "on-secondary-fixed": "#433e3b",
+        "on-secondary-fixed-variant": "#605a57",
+        "tertiary": "#675949",
+        "tertiary-container": "#ffebd6",
+        "tertiary-fixed": "#ffebd6",
+        "tertiary-fixed-dim": "#f0dcc8",
+        "tertiary-dim": "#5b4d3e",
+        "on-tertiary": "#fff0e3",
+        "on-tertiary-fixed": "#514435",
+        "on-tertiary-fixed-variant": "#6f6050",
+        "on-tertiary-container": "#645646",
+        "error": "#b31b25",
+        "error-container": "#fb5151",
+        "error-dim": "#9f0519",
+        "on-error": "#ffefee",
+        "on-error-container": "#570008",
+        "background": "#ece2d9",
+        "surface": "#ece2d9",
+        "surface-dim": "#dbd3c9",
+        "surface-bright": "#ece2d9",
+        "surface-variant": "#e3dcd2",
+        "surface-container-lowest": "#f8f5f2",
+        "surface-container-low": "#f7f0e7",
+        "surface-container": "#eee7de",
+        "surface-container-high": "#e9e1d8",
+        "surface-container-highest": "#e3dcd2",
+        "on-surface": "#171717",
+        "on-surface-variant": "#5f5b55",
+        "on-background": "#171717",
+        "outline": "#7b7670",
+        "outline-variant": "#b2aca5",
+        "inverse-surface": "#100e0a",
+        "inverse-on-surface": "#a19c95",
+      },
+      borderRadius: {
+        DEFAULT: "1rem",
+        lg: "2rem",
+        xl: "3rem",
+        full: "9999px",
+      },
+      fontFamily: {
+        headline: ["Space Grotesk"],
+        body: ["Plus Jakarta Sans"],
+        label: ["Plus Jakarta Sans"],
+      },
+    },
+  },
+};
+</script>
+<style>
+  * { font-family: 'Plus Jakarta Sans', sans-serif; }
+  h1,h2,h3,h4,.font-headline,.headline-text { font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; }
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+  }
+  .fill-icon { font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+  body { background-color: #ece2d9; color: #171717; overflow-x: hidden; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #b2aca5; border-radius: 10px; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .nav-link.active { background: #eee7de; color: #ad2b00; }
+  .nav-link.active .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(49,46,41,0.4); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .modal-overlay.open { display: flex; }
+  .fab-menu { display: none; }
+  .fab-menu.open { display: flex; }
+  @keyframes fadeInUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+  .animate-in { animation: fadeInUp 0.3s ease forwards; }
+  .progress-bar { transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+  input, select, textarea {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+  }
+  .tag { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 999px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+  .tag-income { background: #dcfce7; color: #166534; }
+  .tag-expense { background: #fff0ec; color: #7a1a00; }
+  .tag-sub { background: #ffebd6; color: #675949; }
+  .tag-invest { background: #fef9c3; color: #854d0e; }
+  .csv-drop-active { border-color: #ad2b00 !important; background: #fff5f0 !important; }
+  .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background: #e3dcd2; border-radius: 22px;
+    transition: background 0.2s;
+  }
+  .toggle-slider:before {
+    content: ""; position: absolute; width: 16px; height: 16px;
+    left: 3px; bottom: 3px; background: white; border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .toggle-switch input:checked + .toggle-slider { background: #ad2b00; }
+  .toggle-switch input:checked + .toggle-slider:before { transform: translateX(18px); }
+  .mesh-gradient {
+    background-image: radial-gradient(at 0% 0%, rgba(255,120,83,0.15) 0px, transparent 50%),
+                      radial-gradient(at 100% 100%, rgba(173,43,0,0.08) 0px, transparent 50%);
+  }
+
+  /* ── Dark Mode ── */
+  .dark body { background-color: #1a1410; color: #f0e8df; }
+  .dark .bg-surface-container-lowest { background-color: #252017 !important; }
+  .dark .bg-surface-container-low { background-color: #2b251c !important; }
+  .dark .bg-surface-container { background-color: #312b21 !important; }
+  .dark .bg-surface-container-high { background-color: #383127 !important; }
+  .dark .bg-surface-container-highest { background-color: #3f382d !important; }
+  .dark .bg-surface { background-color: #1a1410 !important; }
+  .dark .text-on-surface { color: #f0e8df !important; }
+  .dark .text-on-surface-variant { color: #c2b5ab !important; }
+  .dark .text-on-background { color: #f0e8df !important; }
+  .dark .border-outline-variant\/10 { border-color: rgba(255,255,255,0.07) !important; }
+  .dark .border-outline-variant\/20 { border-color: rgba(255,255,255,0.10) !important; }
+  .dark .border-outline-variant\/30 { border-color: rgba(255,255,255,0.13) !important; }
+  .dark .border-outline-variant { border-color: rgba(255,255,255,0.18) !important; }
+  .dark .text-outline { color: #8a7e74 !important; }
+  .dark .nav-link.active { background: #3a2a1e !important; color: #ff7853 !important; }
+  .dark .modal-overlay { background: rgba(0,0,0,0.6) !important; }
+  .dark .toggle-slider { background: #4a4039 !important; }
+  .dark input, .dark select, .dark textarea { background-color: #2b251c !important; color: #f0e8df !important; border-color: rgba(255,255,255,0.13) !important; }
+  .dark input::placeholder, .dark textarea::placeholder { color: #8a7e74 !important; }
+  .dark .csv-drop-active { background: #2e1a0e !important; }
+  .dark .tag-income { background: #0d2e16 !important; color: #6ee7a0 !important; }
+  .dark .tag-expense { background: #2e150a !important; color: #ff9070 !important; }
+  .dark .tag-sub { background: #2a2015 !important; color: #d4a97a !important; }
+  .dark .tag-invest { background: #2a2508 !important; color: #e0c64a !important; }
+  .dark ::-webkit-scrollbar-thumb { background: #4a4039; }
+  .dark .mesh-gradient {
+    background-image: radial-gradient(at 0% 0%, rgba(255,120,83,0.08) 0px, transparent 50%),
+                      radial-gradient(at 100% 100%, rgba(173,43,0,0.06) 0px, transparent 50%);
+  }
+
+  /* ── Collapsible Sidebar ── */
+  #sidebar {
+    width: 5rem;
+    transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #sidebar:hover {
+    width: 17rem;
+  }
+  #sidebar .sidebar-label {
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: opacity 0.15s ease, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #sidebar:hover .sidebar-label {
+    opacity: 1;
+    max-width: 12rem;
+    transition: opacity 0.2s ease 0.1s, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #sidebar .nav-link { justify-content: flex-start; }
+  #sidebar .nav-icon { flex-shrink: 0; width: 1.5rem; display: flex; align-items: center; justify-content: center; }
+
+  /* ── Mobile: touch & safe-area ── */
+  button, a, input, select, textarea, label { touch-action: manipulation; }
+  .mobile-nav { min-height: 52px; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px 4px; border-radius: 12px; }
+  #mobile-bottom-nav { padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+
+  /* ── More Drawer ── */
+  .more-drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 149; display: none; backdrop-filter: blur(3px); }
+  .more-drawer-overlay.open { display: block; }
+  .more-drawer {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+    border-radius: 1.5rem 1.5rem 0 0;
+    padding: 0 1.25rem max(1.25rem, env(safe-area-inset-bottom));
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .more-drawer.open { transform: translateY(0); }
+  .dark #more-drawer { background: #252017 !important; }
+
+  /* ── Loading overlay ── */
+  #loading-overlay { position: fixed; inset: 0; background: #ece2d9; z-index: 9999; display: flex; align-items: center; justify-content: center; transition: opacity 0.4s ease; }
+  .dark #loading-overlay { background: #1a1410; }
+  #loading-overlay.fade-out { opacity: 0; pointer-events: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 28px; height: 28px; border: 3px solid rgba(173,43,0,0.2); border-top-color: #ad2b00; border-radius: 50%; animation: spin 0.7s linear infinite; }
+
+  /* ── Toast ── */
+  #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(12px); background: #171717; color: #f0e8df; padding: 10px 20px; border-radius: 999px; font-size: 13px; font-weight: 600; z-index: 9000; opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; white-space: nowrap; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body class="text-on-surface">
+
+<!-- ══════════════════════════ SIDEBAR NAV ══════════════════════════ -->
+<nav id="sidebar" class="hidden md:flex flex-col fixed left-0 top-0 h-screen z-50 py-4 px-2">
+  <!-- Floating card -->
+  <div class="flex flex-col h-full rounded-2xl bg-surface-container-lowest overflow-hidden" style="box-shadow: 0 8px 32px rgba(173,43,0,0.10), 0 2px 8px rgba(173,43,0,0.05);">
+
+    <!-- Brand -->
+    <div class="px-3 pt-6 pb-4 flex items-center gap-3 shrink-0">
+      <div class="w-9 h-9 shrink-0 overflow-hidden" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(173,43,0,0.12);">
+        <img src="walletos-logo.png" alt="Wallet OS" class="w-full h-full object-cover"/>
+      </div>
+      <span class="sidebar-label text-lg font-bold text-primary lowercase tracking-tight" style="font-family:'Space Grotesk',sans-serif;">wallet os</span>
+    </div>
+
+    <!-- Main Nav -->
+    <div class="flex-1 flex flex-col gap-0.5 px-2 overflow-y-auto">
+      <a onclick="navigate('dashboard')" class="nav-link active flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-primary/30" style="transition: background-color 0.15s;" href="#">
+        <span class="nav-icon material-symbols-outlined text-xl">dashboard</span>
+        <span class="sidebar-label text-sm font-medium uppercase">dashboard</span>
+      </a>
+      <a onclick="navigate('income')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer text-on-surface-variant hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/20" style="transition: background-color 0.15s;" href="#">
+        <span class="nav-icon material-symbols-outlined text-xl">payments</span>
+        <span class="sidebar-label text-sm font-medium uppercase">income</span>
+      </a>
+      <a onclick="navigate('subscriptions')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer text-on-surface-variant hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/20" style="transition: background-color 0.15s;" href="#">
+        <span class="nav-icon material-symbols-outlined text-xl">subscriptions</span>
+        <span class="sidebar-label text-sm font-medium uppercase">subscriptions</span>
+      </a>
+      <a onclick="navigate('expenses')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer text-on-surface-variant hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/20" style="transition: background-color 0.15s;" href="#">
+        <span class="nav-icon material-symbols-outlined text-xl">receipt_long</span>
+        <span class="sidebar-label text-sm font-medium uppercase">expenses</span>
+      </a>
+      <a onclick="navigate('investments')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer text-on-surface-variant hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/20" style="transition: background-color 0.15s;" href="#">
+        <span class="nav-icon material-symbols-outlined text-xl">analytics</span>
+        <span class="sidebar-label text-sm font-medium uppercase">investments</span>
+      </a>
+      <a onclick="navigate('import')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer text-on-surface-variant hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/20" style="transition: background-color 0.15s;" href="#">
+        <span class="nav-icon material-symbols-outlined text-xl">upload_file</span>
+        <span class="sidebar-label text-sm font-medium uppercase">import</span>
+      </a>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="flex flex-col gap-0.5 px-2 py-3 shrink-0">
+      <a onclick="navigate('settings')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer text-on-surface-variant hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/20" style="transition: background-color 0.15s;" href="#">
+        <span class="nav-icon material-symbols-outlined text-xl">settings</span>
+        <span class="sidebar-label text-sm font-medium uppercase">settings</span>
+      </a>
+    </div>
+
+  </div>
+</nav>
+
+<!-- ══════════════════════════ MAIN ══════════════════════════ -->
+<main class="md:ml-20 md:mr-20 min-h-screen">
+
+  <div class="px-4 md:px-8 pt-6 md:pt-8 pb-28 md:pb-8">
+
+    <!-- ══════ DASHBOARD ══════ -->
+    <div id="page-dashboard" class="page active animate-in">
+
+      <!-- Header -->
+      <section class="pb-6 pt-6 md:pt-8 md:pb-8">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h1 class="text-4xl md:text-5xl font-bold headline-text uppercase tracking-tight text-on-surface">hi niveh</h1>
+            <div class="flex items-center gap-2 mt-2">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              <span class="text-xs text-on-surface-variant font-medium lowercase">Looking at your monthly projections</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <div class="relative hidden md:flex items-center">
+              <span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-lg">search</span>
+              <input type="text" placeholder="search..." class="pl-10 pr-4 py-2 rounded-full bg-surface-container border border-outline-variant/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 w-44 lowercase placeholder:lowercase placeholder:text-on-surface-variant/60"/>
+            </div>
+            <button id="dark-mode-toggle" onclick="toggleDarkMode()" class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-95" style="transition: background-color 0.15s, transform 0.15s;" title="Toggle dark mode">
+              <span id="dark-mode-icon" class="material-symbols-outlined text-xl">dark_mode</span>
+            </button>
+            <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20 shrink-0 bg-surface-container-highest flex items-center justify-center">
+              <img src="avatar.jpg" alt="User" class="w-full h-full object-cover" onerror="this.style.display='none'"/>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bento Grid -->
+      <div class="grid grid-cols-12 gap-4 md:gap-5">
+
+        <!-- Net Position / Income Card — col-span-8 -->
+        <div class="col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-xl p-6 md:p-8 border border-outline-variant/10" style="box-shadow: 0 8px 32px rgba(173,43,0,0.08), 0 1px 4px rgba(173,43,0,0.05);">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">net monthly position</p>
+              <div class="flex items-baseline gap-3 flex-wrap">
+                <span id="dash-net-position" class="text-4xl md:text-5xl font-bold headline-text text-on-surface tracking-tight">R 0.00</span>
+                <span id="dash-net-badge" class="text-xs font-bold px-2 py-0.5 rounded-full"></span>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-primary text-3xl">trending_up</span>
+          </div>
+          <!-- Income Breakdown -->
+          <div id="dash-income-breakdown" class="space-y-4 mt-6 pt-6 border-t border-outline-variant/10">
+            <p class="text-sm text-on-surface-variant">No income recorded yet. <a onclick="navigate('income')" class="text-primary font-semibold cursor-pointer hover:underline">Add income →</a></p>
+          </div>
+          <!-- 3-stat row -->
+          <div class="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-outline-variant/10">
+            <div>
+              <p class="text-xs text-on-surface-variant font-medium mb-1 capitalize">Income</p>
+              <p id="dash-total-income" class="text-xl font-bold headline-text">R 0.00</p>
+            </div>
+            <div>
+              <p class="text-xs text-on-surface-variant font-medium mb-1 capitalize">Outgoings</p>
+              <p id="dash-total-expenses" class="text-xl font-bold headline-text">R 0.00</p>
+            </div>
+            <div>
+              <p class="text-xs text-on-surface-variant font-medium mb-1 capitalize">Portfolio</p>
+              <p id="dash-portfolio-value" class="text-xl font-bold headline-text">R 0.00</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subscriptions Card — col-span-4 -->
+        <div class="col-span-12 lg:col-span-4 bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/10 flex flex-col" style="box-shadow: 0 4px 16px rgba(173,43,0,0.06), 0 1px 3px rgba(173,43,0,0.04);">
+          <div class="flex justify-between items-center mb-5">
+            <h2 class="font-bold headline-text uppercase text-lg">subscriptions</h2>
+            <p id="dash-total-subs" class="text-sm font-bold text-primary">R 0.00</p>
+          </div>
+          <div id="dash-subs-list" class="flex flex-col gap-2 flex-grow">
+            <p class="text-sm text-on-surface-variant">No subscriptions yet. <a onclick="navigate('subscriptions')" class="text-primary font-semibold cursor-pointer hover:underline">Add →</a></p>
+          </div>
+          <button onclick="navigate('subscriptions')" class="mt-4 w-full text-xs font-bold text-primary hover:text-primary-dim lowercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg py-1 active:opacity-70" style="transition: color 0.15s;">manage all →</button>
+        </div>
+
+        <!-- Expense Breakdown — col-span-8 -->
+        <div class="col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-xl p-6 md:p-8 border border-outline-variant/10" style="box-shadow: 0 4px 16px rgba(173,43,0,0.06), 0 1px 3px rgba(173,43,0,0.04);">
+          <div class="flex justify-between items-start mb-6">
+            <div>
+              <h2 class="text-lg font-bold headline-text uppercase mb-1">expense breakdown</h2>
+              <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">by category</p>
+            </div>
+          </div>
+          <div class="flex flex-col md:flex-row items-center gap-6">
+            <div class="relative w-48 h-48 shrink-0">
+              <canvas id="expenseChart"></canvas>
+              <div id="chart-center" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wide">total</span>
+                <span id="chart-center-val" class="text-lg font-bold headline-text text-on-surface">R 0</span>
+              </div>
+            </div>
+            <div id="expense-legend" class="flex-grow grid grid-cols-1 gap-2 w-full">
+              <p class="text-sm text-on-surface-variant">No expenses yet. <a onclick="navigate('expenses')" class="text-primary font-semibold cursor-pointer hover:underline">Add expenses →</a></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recurring Expenses — col-span-4 -->
+        <div class="col-span-12 lg:col-span-4 bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/10" style="box-shadow: 0 4px 16px rgba(173,43,0,0.06), 0 1px 3px rgba(173,43,0,0.04);">
+          <h2 class="font-bold headline-text uppercase text-lg mb-5">recurring expenses</h2>
+          <div id="dash-expenses-list" class="flex flex-col gap-3">
+            <p class="text-sm text-on-surface-variant">No recurring expenses. <a onclick="navigate('expenses')" class="text-primary font-semibold cursor-pointer hover:underline">Add expenses →</a></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════ INCOME ══════ -->
+    <div id="page-income" class="page animate-in">
+      <div class="py-6 md:py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold headline-text tracking-tight uppercase">vault</h1>
+          <p class="text-sm text-on-surface-variant mt-1">Track salary, freelance, and other income sources.</p>
+        </div>
+        <button onclick="openModal('income')" class="flex items-center gap-2 bg-primary text-on-primary px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary-dim focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.98]" style="box-shadow: 0 4px 16px rgba(173,43,0,0.25), 0 1px 4px rgba(173,43,0,0.12); transition: background-color 0.15s, transform 0.15s;">
+          <span class="material-symbols-outlined text-xl">add</span> Add Income
+        </button>
+      </div>
+
+      <!-- Monthly Total -->
+      <div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-5 mb-5 flex items-center justify-between" style="box-shadow: 0 4px 16px rgba(173,43,0,0.06), 0 1px 3px rgba(173,43,0,0.04);">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Total Monthly Income</p>
+          <p id="income-total" class="text-3xl font-bold headline-text tracking-tight">R 0.00</p>
+        </div>
+        <span class="material-symbols-outlined text-5xl text-surface-container-highest">payments</span>
+      </div>
+
+      <div id="income-list" class="flex flex-col gap-3">
+        <div class="bg-surface-container-low rounded-xl p-8 text-center text-on-surface-variant">
+          <span class="material-symbols-outlined text-5xl mb-3 block opacity-30">payments</span>
+          <p class="font-semibold">No income added yet</p>
+          <p class="text-sm mt-1">Add your salary and other income sources to get started.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ EXPENSES ══════ -->
+    <div id="page-expenses" class="page animate-in">
+      <div class="py-6 md:py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold headline-text tracking-tight uppercase">ledger</h1>
+          <p class="text-sm text-on-surface-variant mt-1">Rent, fuel, groceries, utilities, and more.</p>
+        </div>
+        <button onclick="openModal('expense')" class="flex items-center gap-2 bg-primary text-on-primary px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary-dim focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.98]" style="box-shadow: 0 4px 16px rgba(173,43,0,0.25), 0 1px 4px rgba(173,43,0,0.12); transition: background-color 0.15s, transform 0.15s;">
+          <span class="material-symbols-outlined text-xl">add</span> Add Expense
+        </button>
+      </div>
+
+      <div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-5 mb-5 flex items-center justify-between" style="box-shadow: 0 4px 16px rgba(173,43,0,0.06), 0 1px 3px rgba(173,43,0,0.04);">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Total Monthly Expenses</p>
+          <p id="expenses-total" class="text-3xl font-bold headline-text tracking-tight">R 0.00</p>
+        </div>
+        <span class="material-symbols-outlined text-5xl text-surface-container-highest">receipt_long</span>
+      </div>
+
+      <div id="expenses-list" class="flex flex-col gap-3">
+        <div class="bg-surface-container-low rounded-xl p-8 text-center text-on-surface-variant">
+          <span class="material-symbols-outlined text-5xl mb-3 block opacity-30">receipt_long</span>
+          <p class="font-semibold">No expenses added yet</p>
+          <p class="text-sm mt-1">Track your recurring expenses to understand your spending.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ SUBSCRIPTIONS ══════ -->
+    <div id="page-subscriptions" class="page animate-in">
+      <div class="py-6 md:py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold headline-text tracking-tight uppercase">subscriptions</h1>
+          <p class="text-sm text-on-surface-variant mt-1">Streaming, software, gym, insurance, and more.</p>
+        </div>
+        <button onclick="openModal('subscription')" class="flex items-center gap-2 bg-primary text-on-primary px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary-dim focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.98]" style="box-shadow: 0 4px 16px rgba(173,43,0,0.25), 0 1px 4px rgba(173,43,0,0.12); transition: background-color 0.15s, transform 0.15s;">
+          <span class="material-symbols-outlined text-xl">add</span> Add Subscription
+        </button>
+      </div>
+
+      <div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-5 mb-5 flex items-center justify-between" style="box-shadow: 0 4px 16px rgba(173,43,0,0.06), 0 1px 3px rgba(173,43,0,0.04);">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Total Active Monthly</p>
+          <p id="subs-total" class="text-3xl font-bold headline-text tracking-tight">R 0.00</p>
+        </div>
+        <span class="material-symbols-outlined text-5xl text-surface-container-highest">subscriptions</span>
+      </div>
+
+      <div id="subs-list" class="flex flex-col gap-3">
+        <div class="bg-surface-container-low rounded-xl p-8 text-center text-on-surface-variant">
+          <span class="material-symbols-outlined text-5xl mb-3 block opacity-30">subscriptions</span>
+          <p class="font-semibold">No subscriptions added yet</p>
+          <p class="text-sm mt-1">Add your streaming, gym, and other recurring subscriptions.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ INVESTMENTS ══════ -->
+    <div id="page-investments" class="page animate-in">
+      <div class="py-6 md:py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold headline-text tracking-tight uppercase">analytics</h1>
+          <p class="text-sm text-on-surface-variant mt-1">Stocks, ETFs, crypto, property, and more.</p>
+        </div>
+        <button onclick="openModal('investment')" class="flex items-center gap-2 bg-primary text-on-primary px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary-dim focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.98]" style="box-shadow: 0 4px 16px rgba(173,43,0,0.25), 0 1px 4px rgba(173,43,0,0.12); transition: background-color 0.15s, transform 0.15s;">
+          <span class="material-symbols-outlined text-xl">add</span> Add Holding
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-5" style="box-shadow: 0 4px 16px rgba(173,43,0,0.06), 0 1px 3px rgba(173,43,0,0.04);">
+          <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Total Value</p>
+          <p id="invest-total" class="text-2xl font-bold headline-text tracking-tight">R 0.00</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-5" style="box-shadow: 0 4px 16px rgba(173,43,0,0.06), 0 1px 3px rgba(173,43,0,0.04);">
+          <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Total Cost</p>
+          <p id="invest-cost" class="text-2xl font-bold headline-text tracking-tight">R 0.00</p>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-5" style="box-shadow: 0 4px 16px rgba(173,43,0,0.06), 0 1px 3px rgba(173,43,0,0.04);">
+          <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Unrealised Gain/Loss</p>
+          <p id="invest-gain" class="text-2xl font-bold headline-text tracking-tight">R 0.00</p>
+        </div>
+      </div>
+
+      <div id="invest-list" class="flex flex-col gap-3">
+        <div class="bg-surface-container-low rounded-xl p-8 text-center text-on-surface-variant">
+          <span class="material-symbols-outlined text-5xl mb-3 block opacity-30">analytics</span>
+          <p class="font-semibold">No holdings added yet</p>
+          <p class="text-sm mt-1">Track your investment portfolio by adding your holdings.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ IMPORT ══════ -->
+    <div id="page-import" class="page animate-in">
+      <div class="py-6 md:py-8">
+        <h1 class="text-2xl font-bold headline-text tracking-tight uppercase">import</h1>
+        <p class="text-sm text-on-surface-variant mt-1">Upload a CSV export from FNB, Capitec, ABSA, or Nedbank.</p>
+      </div>
+
+      <div id="csv-drop-zone" class="border-2 border-dashed border-outline-variant rounded-xl p-10 md:p-16 text-center cursor-pointer hover:border-primary hover:bg-surface-container-low mb-6" style="transition: border-color 0.15s, background-color 0.15s;" onclick="document.getElementById('csv-file-input').click()">
+        <span class="material-symbols-outlined text-6xl text-outline mb-4 block">upload_file</span>
+        <p class="font-bold text-on-surface text-lg mb-2">Drop your CSV file here</p>
+        <p class="text-sm text-on-surface-variant mb-4">or click to browse</p>
+        <p class="text-xs text-on-surface-variant font-medium bg-surface-container rounded-full inline-block px-3 py-1">Supports: FNB · Capitec · ABSA · Nedbank</p>
+        <input type="file" id="csv-file-input" accept=".csv" class="hidden" onchange="handleCSVUpload(event)"/>
+      </div>
+
+      <div id="csv-preview-section" class="hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold headline-text">Preview <span id="csv-row-count" class="text-on-surface-variant font-medium text-base"></span></h2>
+          <div class="flex gap-3">
+            <button onclick="cancelCSV()" class="px-4 py-2 rounded-xl border border-outline-variant text-sm font-semibold hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/30 active:scale-[0.98]" style="transition: background-color 0.15s, transform 0.15s;">Cancel</button>
+            <button onclick="importCSV()" class="px-4 py-2 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary-dim focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.98]" style="box-shadow: 0 4px 12px rgba(173,43,0,0.2); transition: background-color 0.15s, transform 0.15s;">Import All</button>
+          </div>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl overflow-hidden shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-outline-variant/20 bg-surface-container-low">
+                  <th class="text-left px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Date</th>
+                  <th class="text-left px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Description</th>
+                  <th class="text-right px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Amount</th>
+                  <th class="text-left px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Category</th>
+                </tr>
+              </thead>
+              <tbody id="csv-preview-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Imported Transactions -->
+      <div class="mt-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold headline-text">Imported Transactions</h2>
+          <button onclick="clearTransactions()" id="clear-tx-btn" class="hidden text-xs font-semibold text-error hover:underline">Clear All</button>
+        </div>
+        <div id="transactions-list">
+          <div class="bg-surface-container-low rounded-xl p-8 text-center text-on-surface-variant">
+            <span class="material-symbols-outlined text-5xl mb-3 block opacity-30">receipt</span>
+            <p class="font-semibold">No transactions imported yet</p>
+            <p class="text-sm mt-1">Upload a CSV bank statement to import transactions.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ SETTINGS ══════ -->
+    <div id="page-settings" class="page animate-in">
+      <div class="py-6 md:py-8">
+        <h1 class="text-2xl font-bold headline-text tracking-tight uppercase">settings</h1>
+        <p class="text-sm text-on-surface-variant mt-1">Manage your data, backups, and preferences.</p>
+      </div>
+
+      <div class="flex flex-col gap-4 max-w-2xl">
+        <div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-6" style="box-shadow: 0 4px 16px rgba(173,43,0,0.06), 0 1px 3px rgba(173,43,0,0.04);">
+          <h3 class="font-bold headline-text mb-1">Export Data</h3>
+          <p class="text-sm text-on-surface-variant mb-4">Download all your budget data as a JSON backup file.</p>
+          <button onclick="exportData()" class="flex items-center gap-2 bg-primary text-on-primary px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary-dim focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.98]" style="box-shadow: 0 4px 16px rgba(173,43,0,0.25), 0 1px 4px rgba(173,43,0,0.12); transition: background-color 0.15s, transform 0.15s;">
+            <span class="material-symbols-outlined text-xl">download</span> Download Backup
+          </button>
+        </div>
+
+        <div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-6" style="box-shadow: 0 4px 16px rgba(173,43,0,0.06), 0 1px 3px rgba(173,43,0,0.04);">
+          <h3 class="font-bold headline-text mb-1">Import Backup</h3>
+          <p class="text-sm text-on-surface-variant mb-4">Restore data from a previously exported JSON backup file.</p>
+          <label class="flex items-center gap-2 bg-surface-container-low border border-outline-variant/20 text-on-surface px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-surface-container cursor-pointer w-fit focus-visible:ring-2 focus-visible:ring-outline/30" style="transition: background-color 0.15s;">
+            <span class="material-symbols-outlined text-xl">upload</span> Choose Backup File
+            <input type="file" accept=".json" onchange="importData(event)" class="hidden"/>
+          </label>
+        </div>
+
+        <div class="bg-surface-container-lowest border border-error/20 rounded-xl p-6" style="box-shadow: 0 4px 16px rgba(173,43,0,0.06), 0 1px 3px rgba(173,43,0,0.04);">
+          <h3 class="font-bold headline-text mb-1 text-error">Clear All Data</h3>
+          <p class="text-sm text-on-surface-variant mb-4">Permanently delete all income, expenses, subscriptions, investments, and transactions. This cannot be undone.</p>
+          <button onclick="clearAllData()" class="flex items-center gap-2 bg-error text-white px-4 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 focus-visible:ring-2 focus-visible:ring-error/40 active:scale-[0.98]" style="transition: opacity 0.15s, transform 0.15s;">
+            <span class="material-symbols-outlined text-xl">delete_forever</span> Clear All Data
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /px-8 -->
+</main>
+
+<!-- ══════════════════════════ MOBILE BOTTOM NAV ══════════════════════════ -->
+<nav id="mobile-bottom-nav" class="md:hidden fixed bottom-0 left-0 w-full bg-surface-container-lowest/96 backdrop-blur-md z-50 border-t border-outline-variant/20">
+  <div class="flex justify-around items-stretch px-1 pt-1">
+    <a onclick="navigate('dashboard')" class="mobile-nav text-primary" href="#" id="mobnav-dashboard">
+      <span class="material-symbols-outlined fill-icon text-[22px]">dashboard</span>
+      <span class="text-[10px] font-bold uppercase tracking-wide">Home</span>
+    </a>
+    <a onclick="navigate('income')" class="mobile-nav text-on-surface-variant" href="#" id="mobnav-income">
+      <span class="material-symbols-outlined text-[22px]">payments</span>
+      <span class="text-[10px] font-bold uppercase tracking-wide">Income</span>
+    </a>
+    <a onclick="navigate('expenses')" class="mobile-nav text-on-surface-variant" href="#" id="mobnav-expenses">
+      <span class="material-symbols-outlined text-[22px]">receipt_long</span>
+      <span class="text-[10px] font-bold uppercase tracking-wide">Expenses</span>
+    </a>
+    <a onclick="navigate('subscriptions')" class="mobile-nav text-on-surface-variant" href="#" id="mobnav-subscriptions">
+      <span class="material-symbols-outlined text-[22px]">subscriptions</span>
+      <span class="text-[10px] font-bold uppercase tracking-wide">Subs</span>
+    </a>
+    <button onclick="openMoreDrawer()" class="mobile-nav text-on-surface-variant" id="mobnav-more">
+      <span class="material-symbols-outlined text-[22px]">grid_view</span>
+      <span class="text-[10px] font-bold uppercase tracking-wide">More</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════ MORE DRAWER ══════════════════════════ -->
+<div id="more-drawer-overlay" class="more-drawer-overlay md:hidden" onclick="closeMoreDrawer()"></div>
+<div id="more-drawer" class="more-drawer md:hidden bg-surface-container-lowest" style="box-shadow: 0 -8px 40px rgba(49,46,41,0.15);">
+  <!-- Handle -->
+  <div class="flex justify-center pt-3 pb-4">
+    <div class="w-10 h-1 rounded-full bg-outline-variant/50"></div>
+  </div>
+  <div class="grid grid-cols-3 gap-3 mb-5">
+    <button onclick="navigate('investments'); closeMoreDrawer()" class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container active:scale-95 focus-visible:ring-2 focus-visible:ring-primary/30" style="transition: background-color 0.15s, transform 0.12s;" id="mobnav-investments">
+      <span class="material-symbols-outlined text-2xl text-on-surface-variant">analytics</span>
+      <span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Invest</span>
+    </button>
+    <button onclick="navigate('import'); closeMoreDrawer()" class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container active:scale-95 focus-visible:ring-2 focus-visible:ring-primary/30" style="transition: background-color 0.15s, transform 0.12s;" id="mobnav-import">
+      <span class="material-symbols-outlined text-2xl text-on-surface-variant">upload_file</span>
+      <span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Import</span>
+    </button>
+    <button onclick="navigate('settings'); closeMoreDrawer()" class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container active:scale-95 focus-visible:ring-2 focus-visible:ring-primary/30" style="transition: background-color 0.15s, transform 0.12s;" id="mobnav-settings">
+      <span class="material-symbols-outlined text-2xl text-on-surface-variant">settings</span>
+      <span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Settings</span>
+    </button>
+  </div>
+  <div class="flex items-center justify-between p-4 rounded-2xl bg-surface-container-low mb-2">
+    <span class="text-sm font-semibold text-on-surface">Dark Mode</span>
+    <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high active:scale-95" style="transition: background-color 0.15s, transform 0.12s;">
+      <span id="drawer-dark-icon" class="material-symbols-outlined text-xl">dark_mode</span>
+    </button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Loading overlay -->
+<div id="loading-overlay">
+  <div class="flex flex-col items-center gap-4">
+    <img src="walletos-logo.png" alt="" class="w-10 h-10 rounded-xl opacity-80"/>
+    <div class="spinner"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ FAB ══════════════════════════ -->
+<div class="fixed bottom-[88px] right-4 md:bottom-8 md:right-8 z-50 flex flex-col-reverse items-end gap-3">
+  <div id="fab-menu" class="fab-menu flex-col-reverse gap-2 items-end">
+    <button onclick="openModal('income'); toggleFAB()" class="flex items-center gap-2 bg-surface-container-lowest border border-outline-variant/20 text-on-surface px-3 py-2 rounded-xl text-sm font-semibold hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/30 active:scale-[0.98]" style="box-shadow: 0 4px 16px rgba(49,46,41,0.1), 0 1px 4px rgba(49,46,41,0.06); transition: background-color 0.15s, transform 0.15s;">
+      <span class="material-symbols-outlined text-primary text-xl">payments</span> Add Income
+    </button>
+    <button onclick="openModal('expense'); toggleFAB()" class="flex items-center gap-2 bg-surface-container-lowest border border-outline-variant/20 text-on-surface px-3 py-2 rounded-xl text-sm font-semibold hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/30 active:scale-[0.98]" style="box-shadow: 0 4px 16px rgba(49,46,41,0.1), 0 1px 4px rgba(49,46,41,0.06); transition: background-color 0.15s, transform 0.15s;">
+      <span class="material-symbols-outlined text-error text-xl">receipt_long</span> Add Expense
+    </button>
+    <button onclick="openModal('subscription'); toggleFAB()" class="flex items-center gap-2 bg-surface-container-lowest border border-outline-variant/20 text-on-surface px-3 py-2 rounded-xl text-sm font-semibold hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/30 active:scale-[0.98]" style="box-shadow: 0 4px 16px rgba(49,46,41,0.1), 0 1px 4px rgba(49,46,41,0.06); transition: background-color 0.15s, transform 0.15s;">
+      <span class="material-symbols-outlined text-tertiary text-xl">subscriptions</span> Add Subscription
+    </button>
+    <button onclick="openModal('investment'); toggleFAB()" class="flex items-center gap-2 bg-surface-container-lowest border border-outline-variant/20 text-on-surface px-3 py-2 rounded-xl text-sm font-semibold hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/30 active:scale-[0.98]" style="box-shadow: 0 4px 16px rgba(49,46,41,0.1), 0 1px 4px rgba(49,46,41,0.06); transition: background-color 0.15s, transform 0.15s;">
+      <span class="material-symbols-outlined text-yellow-700 text-xl">show_chart</span> Add Investment
+    </button>
+  </div>
+  <button id="fab-btn" onclick="toggleFAB()" class="w-14 h-14 bg-primary text-on-primary rounded-full flex items-center justify-center hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-primary/50" style="box-shadow: 0 8px 24px rgba(173,43,0,0.38), 0 2px 8px rgba(173,43,0,0.2); transition: transform 0.15s, box-shadow 0.15s;">
+    <span id="fab-icon" class="material-symbols-outlined text-3xl">add</span>
+  </button>
+</div>
+
+<!-- ══════════════════════════ MODALS ══════════════════════════ -->
+
+<!-- Income Modal -->
+<div id="modal-income" class="modal-overlay" onclick="closeModalOnOverlay(event, 'income')">
+  <div class="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-md mx-4 animate-in" style="box-shadow: 0 24px 60px rgba(49,46,41,0.18), 0 4px 16px rgba(49,46,41,0.1);">
+    <div class="flex items-center justify-between mb-5">
+      <h3 id="income-modal-title" class="text-lg font-bold headline-text">Add Income</h3>
+      <button onclick="closeModal('income')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center focus-visible:ring-2 focus-visible:ring-outline/30 active:scale-95" style="transition: background-color 0.15s, transform 0.15s;">
+        <span class="material-symbols-outlined text-on-surface-variant">close</span>
+      </button>
+    </div>
+    <form id="income-form" onsubmit="saveIncome(event)" class="flex flex-col gap-4">
+      <input type="hidden" id="income-edit-id"/>
+      <div>
+        <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Label / Description</label>
+        <input type="text" id="income-label" placeholder="e.g. Monthly Salary" required class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Amount (R)</label>
+          <input type="number" id="income-amount" placeholder="0.00" min="0" step="0.01" required class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+        </div>
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Type</label>
+          <select id="income-type" required class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <option value="salary">Salary (Net)</option>
+            <option value="extra">Extra Income</option>
+            <option value="freelance">Freelance</option>
+            <option value="rental">Rental</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Frequency</label>
+        <select id="income-frequency" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+          <option value="monthly">Monthly</option>
+          <option value="weekly">Weekly</option>
+          <option value="fortnightly">Fortnightly</option>
+          <option value="annual">Annual</option>
+        </select>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeModal('income')" class="flex-1 py-3 rounded-xl border border-outline-variant/30 text-sm font-semibold hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/30 active:scale-[0.98]" style="transition: background-color 0.15s, transform 0.15s;">Cancel</button>
+        <button type="submit" class="flex-1 py-3 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary-dim focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.98]" style="box-shadow: 0 4px 12px rgba(173,43,0,0.2); transition: background-color 0.15s, transform 0.15s;">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Expense Modal -->
+<div id="modal-expense" class="modal-overlay" onclick="closeModalOnOverlay(event, 'expense')">
+  <div class="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-md mx-4 animate-in" style="box-shadow: 0 24px 60px rgba(49,46,41,0.18), 0 4px 16px rgba(49,46,41,0.1);">
+    <div class="flex items-center justify-between mb-5">
+      <h3 id="expense-modal-title" class="text-lg font-bold headline-text">Add Expense</h3>
+      <button onclick="closeModal('expense')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center focus-visible:ring-2 focus-visible:ring-outline/30 active:scale-95" style="transition: background-color 0.15s, transform 0.15s;">
+        <span class="material-symbols-outlined text-on-surface-variant">close</span>
+      </button>
+    </div>
+    <form id="expense-form" onsubmit="saveExpense(event)" class="flex flex-col gap-4">
+      <input type="hidden" id="expense-edit-id"/>
+      <div>
+        <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Label / Description</label>
+        <input type="text" id="expense-label" placeholder="e.g. Monthly Rent" required class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Amount (R)</label>
+          <input type="number" id="expense-amount" placeholder="0.00" min="0" step="0.01" required class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+        </div>
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Category</label>
+          <select id="expense-category" required class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <option value="Rent">Rent / Bond</option>
+            <option value="Fuel">Fuel</option>
+            <option value="Groceries">Groceries</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Transport">Transport</option>
+            <option value="Medical">Medical</option>
+            <option value="Education">Education</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Clothing">Clothing</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Frequency</label>
+          <select id="expense-frequency" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <option value="monthly">Monthly</option>
+            <option value="weekly">Weekly</option>
+            <option value="fortnightly">Fortnightly</option>
+            <option value="annual">Annual</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Due Day</label>
+          <input type="number" id="expense-day" placeholder="1-31" min="1" max="31" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+        </div>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeModal('expense')" class="flex-1 py-3 rounded-xl border border-outline-variant/30 text-sm font-semibold hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/30 active:scale-[0.98]" style="transition: background-color 0.15s, transform 0.15s;">Cancel</button>
+        <button type="submit" class="flex-1 py-3 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary-dim focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.98]" style="box-shadow: 0 4px 12px rgba(173,43,0,0.2); transition: background-color 0.15s, transform 0.15s;">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Subscription Modal -->
+<div id="modal-subscription" class="modal-overlay" onclick="closeModalOnOverlay(event, 'subscription')">
+  <div class="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-md mx-4 animate-in" style="box-shadow: 0 24px 60px rgba(49,46,41,0.18), 0 4px 16px rgba(49,46,41,0.1);">
+    <div class="flex items-center justify-between mb-5">
+      <h3 id="sub-modal-title" class="text-lg font-bold headline-text">Add Subscription</h3>
+      <button onclick="closeModal('subscription')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center focus-visible:ring-2 focus-visible:ring-outline/30 active:scale-95" style="transition: background-color 0.15s, transform 0.15s;">
+        <span class="material-symbols-outlined text-on-surface-variant">close</span>
+      </button>
+    </div>
+    <form id="sub-form" onsubmit="saveSubscription(event)" class="flex flex-col gap-4">
+      <input type="hidden" id="sub-edit-id"/>
+      <div>
+        <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Service Name</label>
+        <input type="text" id="sub-service" placeholder="e.g. Netflix, Gym, Discovery" required class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Monthly Amount (R)</label>
+          <input type="number" id="sub-amount" placeholder="0.00" min="0" step="0.01" required class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+        </div>
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Category</label>
+          <select id="sub-category" required class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <option value="Streaming">Streaming</option>
+            <option value="Music">Music</option>
+            <option value="Software">Software</option>
+            <option value="Gym">Gym</option>
+            <option value="Insurance">Insurance</option>
+            <option value="Medical Aid">Medical Aid</option>
+            <option value="Banking">Banking</option>
+            <option value="Storage">Storage</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Billing Day</label>
+          <input type="number" id="sub-billing-day" placeholder="1-31" min="1" max="31" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+        </div>
+        <div class="flex flex-col justify-end">
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Active</label>
+          <div class="flex items-center gap-2 h-[46px]">
+            <label class="toggle-switch">
+              <input type="checkbox" id="sub-active" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="text-sm font-medium text-on-surface-variant">Enabled</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeModal('subscription')" class="flex-1 py-3 rounded-xl border border-outline-variant/30 text-sm font-semibold hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/30 active:scale-[0.98]" style="transition: background-color 0.15s, transform 0.15s;">Cancel</button>
+        <button type="submit" class="flex-1 py-3 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary-dim focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.98]" style="box-shadow: 0 4px 12px rgba(173,43,0,0.2); transition: background-color 0.15s, transform 0.15s;">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Investment Modal -->
+<div id="modal-investment" class="modal-overlay" onclick="closeModalOnOverlay(event, 'investment')">
+  <div class="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-md mx-4 animate-in" style="box-shadow: 0 24px 60px rgba(49,46,41,0.18), 0 4px 16px rgba(49,46,41,0.1);">
+    <div class="flex items-center justify-between mb-5">
+      <h3 id="invest-modal-title" class="text-lg font-bold headline-text">Add Holding</h3>
+      <button onclick="closeModal('investment')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center focus-visible:ring-2 focus-visible:ring-outline/30 active:scale-95" style="transition: background-color 0.15s, transform 0.15s;">
+        <span class="material-symbols-outlined text-on-surface-variant">close</span>
+      </button>
+    </div>
+    <form id="invest-form" onsubmit="saveInvestment(event)" class="flex flex-col gap-4">
+      <input type="hidden" id="invest-edit-id"/>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Name</label>
+          <input type="text" id="invest-name" placeholder="e.g. Satrix S&P 500" required class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+        </div>
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Asset Type</label>
+          <select id="invest-type" required class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <option value="Stocks">Stocks / Shares</option>
+            <option value="ETF">ETF</option>
+            <option value="Crypto">Crypto</option>
+            <option value="Property">Property</option>
+            <option value="Bonds">Bonds</option>
+            <option value="Cash">Cash / Savings</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Units / Quantity</label>
+          <input type="number" id="invest-units" placeholder="0" min="0" step="any" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+        </div>
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Purchase Price (R)</label>
+          <input type="number" id="invest-purchase-price" placeholder="0.00" min="0" step="0.01" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-1.5">Current Value (R) — Total</label>
+        <input type="number" id="invest-current-value" placeholder="0.00" min="0" step="0.01" required class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+        <p class="text-xs text-on-surface-variant mt-1">Enter the current total market value of this holding.</p>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeModal('investment')" class="flex-1 py-3 rounded-xl border border-outline-variant/30 text-sm font-semibold hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/30 active:scale-[0.98]" style="transition: background-color 0.15s, transform 0.15s;">Cancel</button>
+        <button type="submit" class="flex-1 py-3 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary-dim focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.98]" style="box-shadow: 0 4px 12px rgba(173,43,0,0.2); transition: background-color 0.15s, transform 0.15s;">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<div id="modal-confirm" class="modal-overlay" onclick="closeModalOnOverlay(event, 'confirm')">
+  <div class="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-sm mx-4 animate-in" style="box-shadow: 0 24px 60px rgba(49,46,41,0.18), 0 4px 16px rgba(49,46,41,0.1);">
+    <div class="text-center mb-5">
+      <div class="w-14 h-14 rounded-full bg-error/10 flex items-center justify-center mx-auto mb-3">
+        <span class="material-symbols-outlined text-error text-3xl">delete</span>
+      </div>
+      <h3 class="text-lg font-bold headline-text">Delete Item</h3>
+      <p class="text-sm text-on-surface-variant mt-1">This action cannot be undone.</p>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="closeModal('confirm')" class="flex-1 py-3 rounded-xl border border-outline-variant/30 text-sm font-semibold hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-outline/30 active:scale-[0.98]" style="transition: background-color 0.15s, transform 0.15s;">Cancel</button>
+      <button id="confirm-delete-btn" class="flex-1 py-3 rounded-xl bg-error text-white text-sm font-semibold hover:opacity-90 focus-visible:ring-2 focus-visible:ring-error/40 active:scale-[0.98]" style="transition: opacity 0.15s, transform 0.15s;">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ JAVASCRIPT ══════════════════════════ -->
+<script>
+// ─── Utilities ────────────────────────────────────────────────────
+const R = (n) => 'R\u00a0' + Number(n).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+const qs = (s, ctx = document) => ctx.querySelector(s);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html) e.innerHTML = html; return e; };
+
+// ─── Supabase Config ──────────────────────────────────────────────
+// Replace these two values with your Supabase project credentials:
+const SUPABASE_URL = 'https://wbelykwxjqsdvuezovrl.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiZWx5a3d4anFzZHZ1ZXpvdnJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3ODY4MDMsImV4cCI6MjA5NTM2MjgwM30.hFN_uEYe9UUCiqmIJhDjsJkqja2bLRigdht4iM6tlbg';
+const _sbConfigured = SUPABASE_URL.startsWith('https://') && !SUPABASE_URL.includes('YOUR_PROJECT');
+const sb = _sbConfigured ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+let _userId = null;
+let _dataCache = { income: [], expenses: [], subs: [], investments: [], transactions: [] };
+
+const TABLE = { income: 'income', expenses: 'expenses', subs: 'subscriptions', investments: 'investments', transactions: 'transactions' };
+const FIELD_MAP = {
+  subs: { service:'service', amount:'amount', category:'category', billingDay:'billing_day', active:'active' },
+  investments: { name:'name', assetType:'asset_type', units:'units', purchasePrice:'purchase_price', currentValue:'current_value', costBasis:'cost_basis' },
+  expenses: { label:'label', amount:'amount', category:'category', frequency:'frequency', dayOfMonth:'day_of_month' },
+};
+
+function toDb(key, obj) {
+  const map = FIELD_MAP[key];
+  if (!map) return obj;
+  const out = {};
+  for (const [jsKey, dbCol] of Object.entries(map)) { if (jsKey in obj) out[dbCol] = obj[jsKey]; }
+  for (const k of ['id','label','amount','category','frequency','date','description','source','type']) { if (k in obj && !(k in out)) out[k] = obj[k]; }
+  return out;
+}
+
+function fromDb(key, row) {
+  if (!row) return row;
+  const map = FIELD_MAP[key];
+  if (!map) return row;
+  const out = { ...row };
+  for (const [jsKey, dbCol] of Object.entries(map)) { if (dbCol in out) { out[jsKey] = out[dbCol]; delete out[dbCol]; } }
+  return out;
+}
+
+async function dbLoad(key) {
+  if (!sb || !_userId) return _dataCache[key];
+  const { data, error } = await sb.from(TABLE[key]).select('*').eq('user_id', _userId).order('created_at');
+  if (error) { console.error('load', key, error); return _dataCache[key]; }
+  _dataCache[key] = (data || []).map(r => fromDb(key, r));
+  return _dataCache[key];
+}
+
+async function dbUpsert(key, obj) {
+  if (!sb || !_userId) return;
+  const row = { ...toDb(key, obj), user_id: _userId };
+  const { error } = await sb.from(TABLE[key]).upsert(row, { onConflict: 'id' });
+  if (error) { showToast('Save failed — check connection'); console.error('upsert', key, error); }
+}
+
+async function dbDelete(key, id) {
+  if (!sb || !_userId) return;
+  const { error } = await sb.from(TABLE[key]).delete().eq('id', id).eq('user_id', _userId);
+  if (error) { showToast('Delete failed — check connection'); console.error('delete', key, error); }
+}
+
+// Legacy sync shims used by non-async parts (dark mode theme only)
+const KEYS = { theme: 'theme' };
+const load = (key) => JSON.parse(localStorage.getItem(key) || '[]');
+const save = (key, data) => localStorage.setItem(key, JSON.stringify(data));
+
+// ─── Monthly Equivalent ───────────────────────────────────────────
+function toMonthly(amount, freq) {
+  switch (freq) {
+    case 'weekly': return amount * 52 / 12;
+    case 'fortnightly': return amount * 26 / 12;
+    case 'annual': return amount / 12;
+    default: return Number(amount);
+  }
+}
+
+// ─── Navigation ───────────────────────────────────────────────────
+const PAGE_TITLES = { dashboard: 'Dashboard', income: 'Income', expenses: 'Recurring Expenses', subscriptions: 'Subscriptions & Debit Orders', investments: 'Investment Portfolio', import: 'Import CSV', settings: 'Settings' };
+const BOTTOM_NAV_PAGES = ['dashboard','income','expenses','subscriptions'];
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => {
+    l.classList.remove('active');
+    l.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24";
+  });
+
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) { pageEl.classList.add('active'); pageEl.classList.remove('animate-in'); void pageEl.offsetWidth; pageEl.classList.add('animate-in'); }
+
+  // Sidebar active state
+  document.querySelectorAll('.nav-link').forEach(l => {
+    if (l.getAttribute('onclick') && l.getAttribute('onclick').includes("'" + page + "'")) {
+      l.classList.add('active');
+    }
+  });
+
+  // Mobile bottom nav active state
+  BOTTOM_NAV_PAGES.forEach(p => {
+    const navEl = document.getElementById('mobnav-' + p);
+    if (!navEl) return;
+    if (p === page) {
+      navEl.classList.remove('text-on-surface-variant');
+      navEl.classList.add('text-primary');
+      const icon = navEl.querySelector('.material-symbols-outlined');
+      if (icon) icon.style.fontVariationSettings = "'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24";
+    } else {
+      navEl.classList.remove('text-primary');
+      navEl.classList.add('text-on-surface-variant');
+      const icon = navEl.querySelector('.material-symbols-outlined');
+      if (icon) icon.style.fontVariationSettings = "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24";
+    }
+  });
+  // "More" button lights up for pages in the drawer
+  const moreBtn = document.getElementById('mobnav-more');
+  if (moreBtn) {
+    const isDrawerPage = ['investments','import','settings'].includes(page);
+    moreBtn.classList.toggle('text-primary', isDrawerPage);
+    moreBtn.classList.toggle('text-on-surface-variant', !isDrawerPage);
+    const moreIcon = moreBtn.querySelector('.material-symbols-outlined');
+    if (moreIcon) moreIcon.style.fontVariationSettings = isDrawerPage ? "'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24" : "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24";
+  }
+
+  const pt = qs('#page-title'); if (pt) pt.textContent = PAGE_TITLES[page] || page;
+  if (fabMenu.classList.contains('open')) toggleFAB();
+
+  // Refresh the target page
+  const renders = { dashboard: renderDashboard, income: renderIncome, expenses: renderExpenses, subscriptions: renderSubs, investments: renderInvestments, import: renderTransactions };
+  if (renders[page]) renders[page]();
+}
+
+// ─── More Drawer ──────────────────────────────────────────────────
+function openMoreDrawer() {
+  qs('#more-drawer').classList.add('open');
+  qs('#more-drawer-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMoreDrawer() {
+  qs('#more-drawer').classList.remove('open');
+  qs('#more-drawer-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ─── Toast ────────────────────────────────────────────────────────
+function showToast(msg, duration = 2800) {
+  const t = qs('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ─── FAB ──────────────────────────────────────────────────────────
+const fabMenu = qs('#fab-menu');
+const fabIcon = qs('#fab-icon');
+function toggleFAB() {
+  fabMenu.classList.toggle('open');
+  fabIcon.textContent = fabMenu.classList.contains('open') ? 'close' : 'add';
+}
+
+// ─── Modals ───────────────────────────────────────────────────────
+function openModal(type, id) {
+  if (type === 'income') {
+    qs('#income-modal-title').textContent = id ? 'Edit Income' : 'Add Income';
+    if (id) {
+      const item = _dataCache.income.find(i => i.id === id);
+      if (item) {
+        qs('#income-edit-id').value = id;
+        qs('#income-label').value = item.label;
+        qs('#income-amount').value = item.amount;
+        qs('#income-type').value = item.type;
+        qs('#income-frequency').value = item.frequency;
+      }
+    } else {
+      qs('#income-form').reset();
+      qs('#income-edit-id').value = '';
+    }
+  } else if (type === 'expense') {
+    qs('#expense-modal-title').textContent = id ? 'Edit Expense' : 'Add Expense';
+    if (id) {
+      const item = _dataCache.expenses.find(i => i.id === id);
+      if (item) {
+        qs('#expense-edit-id').value = id;
+        qs('#expense-label').value = item.label;
+        qs('#expense-amount').value = item.amount;
+        qs('#expense-category').value = item.category;
+        qs('#expense-frequency').value = item.frequency;
+        qs('#expense-day').value = item.dayOfMonth || '';
+      }
+    } else {
+      qs('#expense-form').reset();
+      qs('#expense-edit-id').value = '';
+    }
+  } else if (type === 'subscription') {
+    qs('#sub-modal-title').textContent = id ? 'Edit Subscription' : 'Add Subscription';
+    if (id) {
+      const item = _dataCache.subs.find(i => i.id === id);
+      if (item) {
+        qs('#sub-edit-id').value = id;
+        qs('#sub-service').value = item.service;
+        qs('#sub-amount').value = item.amount;
+        qs('#sub-category').value = item.category;
+        qs('#sub-billing-day').value = item.billingDay || '';
+        qs('#sub-active').checked = item.active !== false;
+      }
+    } else {
+      qs('#sub-form').reset();
+      qs('#sub-edit-id').value = '';
+      qs('#sub-active').checked = true;
+    }
+  } else if (type === 'investment') {
+    qs('#invest-modal-title').textContent = id ? 'Edit Holding' : 'Add Holding';
+    if (id) {
+      const item = _dataCache.investments.find(i => i.id === id);
+      if (item) {
+        qs('#invest-edit-id').value = id;
+        qs('#invest-name').value = item.name;
+        qs('#invest-type').value = item.assetType;
+        qs('#invest-units').value = item.units || '';
+        qs('#invest-purchase-price').value = item.purchasePrice || '';
+        qs('#invest-current-value').value = item.currentValue;
+      }
+    } else {
+      qs('#invest-form').reset();
+      qs('#invest-edit-id').value = '';
+    }
+  }
+  qs('#modal-' + type).classList.add('open');
+}
+
+function closeModal(type) {
+  qs('#modal-' + type).classList.remove('open');
+}
+
+function closeModalOnOverlay(event, type) {
+  if (event.target === qs('#modal-' + type)) closeModal(type);
+}
+
+// ─── Income CRUD ──────────────────────────────────────────────────
+async function saveIncome(e) {
+  e.preventDefault();
+  const editId = qs('#income-edit-id').value;
+  const item = {
+    id: editId || uid(),
+    label: qs('#income-label').value,
+    amount: parseFloat(qs('#income-amount').value),
+    type: qs('#income-type').value,
+    frequency: qs('#income-frequency').value,
+  };
+  await dbUpsert('income', item);
+  closeModal('income');
+  await renderIncome();
+  await renderDashboard();
+}
+
+function deleteItem(type, id) {
+  qs('#confirm-delete-btn').onclick = async () => {
+    await dbDelete(type, id);
+    closeModal('confirm');
+    const renders = { income: renderIncome, expenses: renderExpenses, subs: renderSubs, investments: renderInvestments };
+    if (renders[type]) await renders[type]();
+    await renderDashboard();
+  };
+  qs('#modal-confirm').classList.add('open');
+}
+
+async function renderIncome() {
+  const items = await dbLoad('income');
+  const total = items.reduce((s, i) => s + toMonthly(i.amount, i.frequency), 0);
+  qs('#income-total').textContent = R(total);
+  const list = qs('#income-list');
+  if (!items.length) {
+    list.innerHTML = `<div class="bg-surface-container-low rounded-xl p-8 text-center text-on-surface-variant"><span class="material-symbols-outlined text-5xl mb-3 block opacity-30">payments</span><p class="font-semibold">No income added yet</p><p class="text-sm mt-1">Add your salary and other income sources to get started.</p></div>`;
+    return;
+  }
+  const TYPE_ICON = { salary: 'work', extra: 'add_circle', freelance: 'laptop_mac', rental: 'home', other: 'payments' };
+  const TYPE_LABEL = { salary: 'Salary', extra: 'Extra Income', freelance: 'Freelance', rental: 'Rental', other: 'Other' };
+  list.innerHTML = items.map(i => {
+    const monthly = toMonthly(i.amount, i.frequency);
+    const freqLabel = i.frequency.charAt(0).toUpperCase() + i.frequency.slice(1);
+    return `<div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-4 md:p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+      <div class="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-primary">${TYPE_ICON[i.type] || 'payments'}</span>
+      </div>
+      <div class="flex-grow min-w-0">
+        <p class="font-bold text-on-surface truncate">${esc(i.label)}</p>
+        <div class="flex items-center gap-2 mt-0.5">
+          <span class="tag tag-income">${TYPE_LABEL[i.type] || i.type}</span>
+          <span class="text-xs text-on-surface-variant">${freqLabel}</span>
+        </div>
+      </div>
+      <div class="text-right shrink-0">
+        <p class="font-extrabold font-headline text-on-surface">${R(monthly)}<span class="text-xs font-normal text-on-surface-variant">/mo</span></p>
+        ${i.frequency !== 'monthly' ? `<p class="text-xs text-on-surface-variant mt-0.5">${R(i.amount)} ${i.frequency}</p>` : ''}
+      </div>
+      <div class="flex gap-1 shrink-0 ml-1">
+        <button onclick="openModal('income','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center transition-colors text-on-surface-variant hover:text-primary">
+          <span class="material-symbols-outlined text-lg">edit</span>
+        </button>
+        <button onclick="deleteItem('income','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center transition-colors text-on-surface-variant hover:text-error">
+          <span class="material-symbols-outlined text-lg">delete</span>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Expenses CRUD ────────────────────────────────────────────────
+async function saveExpense(e) {
+  e.preventDefault();
+  const editId = qs('#expense-edit-id').value;
+  const item = {
+    id: editId || uid(),
+    label: qs('#expense-label').value,
+    amount: parseFloat(qs('#expense-amount').value),
+    category: qs('#expense-category').value,
+    frequency: qs('#expense-frequency').value,
+    dayOfMonth: parseInt(qs('#expense-day').value) || null,
+  };
+  await dbUpsert('expenses', item);
+  closeModal('expense');
+  await renderExpenses();
+  await renderDashboard();
+}
+
+const EXPENSE_ICONS = { Rent: 'home', Fuel: 'local_gas_station', Groceries: 'shopping_basket', Utilities: 'bolt', Transport: 'directions_bus', Medical: 'local_hospital', Education: 'school', Entertainment: 'movie', Clothing: 'checkroom', Other: 'receipt_long' };
+const EXPENSE_COLORS = { Rent: 'bg-blue-100 text-blue-700', Fuel: 'bg-orange-100 text-orange-700', Groceries: 'bg-green-100 text-green-700', Utilities: 'bg-yellow-100 text-yellow-700', Transport: 'bg-cyan-100 text-cyan-700', Medical: 'bg-red-100 text-red-700', Education: 'bg-purple-100 text-purple-700', Entertainment: 'bg-pink-100 text-pink-700', Clothing: 'bg-slate-100 text-slate-700', Other: 'bg-surface-container text-on-surface' };
+
+async function renderExpenses() {
+  const items = await dbLoad('expenses');
+  const total = items.reduce((s, i) => s + toMonthly(i.amount, i.frequency), 0);
+  qs('#expenses-total').textContent = R(total);
+  const list = qs('#expenses-list');
+  if (!items.length) {
+    list.innerHTML = `<div class="bg-surface-container-low rounded-xl p-8 text-center text-on-surface-variant"><span class="material-symbols-outlined text-5xl mb-3 block opacity-30">receipt_long</span><p class="font-semibold">No expenses added yet</p><p class="text-sm mt-1">Track your recurring expenses to understand your spending.</p></div>`;
+    return;
+  }
+  // Group by category
+  const grouped = {};
+  items.forEach(i => { if (!grouped[i.category]) grouped[i.category] = []; grouped[i.category].push(i); });
+  list.innerHTML = Object.entries(grouped).map(([cat, catItems]) => {
+    const catTotal = catItems.reduce((s, i) => s + toMonthly(i.amount, i.frequency), 0);
+    const expColorCls = EXPENSE_COLORS[cat] || EXPENSE_COLORS.Other;
+    return `<div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl overflow-hidden shadow-sm">
+      <div class="px-5 py-3 bg-surface-container-low border-b border-outline-variant/10 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl ${expColorCls} flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-base">${EXPENSE_ICONS[cat] || 'receipt_long'}</span>
+          </div>
+          <span class="font-bold text-sm">${esc(cat)}</span>
+        </div>
+        <span class="font-bold text-sm font-headline">${R(catTotal)}/mo</span>
+      </div>
+      ${catItems.map(i => {
+        const monthly = toMonthly(i.amount, i.frequency);
+        return `<div class="px-5 py-3.5 flex items-center gap-3 hover:bg-surface-container-low/50 transition-colors border-b border-outline-variant/5 last:border-b-0">
+          <div class="flex-grow min-w-0">
+            <p class="font-semibold text-sm truncate">${esc(i.label)}</p>
+            <p class="text-xs text-on-surface-variant mt-0.5">${i.frequency}${i.dayOfMonth ? ` · due day ${i.dayOfMonth}` : ''}</p>
+          </div>
+          <p class="font-bold text-sm font-headline">${R(monthly)}<span class="text-xs font-normal text-on-surface-variant">/mo</span></p>
+          <div class="flex gap-1">
+            <button onclick="openModal('expense','${i.id}')" class="w-7 h-7 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-base">edit</span>
+            </button>
+            <button onclick="deleteItem('expenses','${i.id}')" class="w-7 h-7 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-error transition-colors">
+              <span class="material-symbols-outlined text-base">delete</span>
+            </button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+// ─── Subscriptions CRUD ───────────────────────────────────────────
+async function saveSubscription(e) {
+  e.preventDefault();
+  const editId = qs('#sub-edit-id').value;
+  const item = {
+    id: editId || uid(),
+    service: qs('#sub-service').value,
+    amount: parseFloat(qs('#sub-amount').value),
+    category: qs('#sub-category').value,
+    billingDay: parseInt(qs('#sub-billing-day').value) || null,
+    active: qs('#sub-active').checked,
+  };
+  await dbUpsert('subs', item);
+  closeModal('subscription');
+  await renderSubs();
+  await renderDashboard();
+}
+
+const SUB_ICONS = { Streaming: 'play_circle', Music: 'music_note', Software: 'computer', Gym: 'fitness_center', Insurance: 'shield', 'Medical Aid': 'health_and_safety', Banking: 'account_balance', Storage: 'cloud', Other: 'subscriptions' };
+const SUB_COLORS = { Streaming: 'bg-red-100 text-red-700', Music: 'bg-green-100 text-green-700', Software: 'bg-blue-100 text-blue-700', Gym: 'bg-orange-100 text-orange-700', Insurance: 'bg-slate-100 text-slate-700', 'Medical Aid': 'bg-cyan-100 text-cyan-700', Banking: 'bg-primary/10 text-primary', Storage: 'bg-purple-100 text-purple-700', Other: 'bg-surface-container text-on-surface' };
+
+async function renderSubs() {
+  const items = await dbLoad('subs');
+  const total = items.filter(i => i.active !== false).reduce((s, i) => s + Number(i.amount), 0);
+  qs('#subs-total').textContent = R(total);
+  const list = qs('#subs-list');
+  if (!items.length) {
+    list.innerHTML = `<div class="bg-surface-container-low rounded-xl p-8 text-center text-on-surface-variant"><span class="material-symbols-outlined text-5xl mb-3 block opacity-30">subscriptions</span><p class="font-semibold">No subscriptions added yet</p><p class="text-sm mt-1">Add your streaming, gym, and other recurring subscriptions.</p></div>`;
+    return;
+  }
+  list.innerHTML = items.map(i => {
+    const colorCls = SUB_COLORS[i.category] || SUB_COLORS.Other;
+    return `<div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow ${i.active === false ? 'opacity-50' : ''}">
+      <div class="w-11 h-11 rounded-xl ${colorCls} flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined">${SUB_ICONS[i.category] || 'subscriptions'}</span>
+      </div>
+      <div class="flex-grow min-w-0">
+        <p class="font-bold text-on-surface truncate">${esc(i.service)}</p>
+        <div class="flex items-center gap-2 mt-0.5">
+          <span class="text-xs text-on-surface-variant">${esc(i.category)}</span>
+          ${i.billingDay ? `<span class="text-xs text-on-surface-variant">· Debit day ${i.billingDay}</span>` : ''}
+        </div>
+      </div>
+      <div class="flex items-center gap-3 shrink-0">
+        <p class="font-extrabold font-headline text-on-surface">${R(i.amount)}<span class="text-xs font-normal text-on-surface-variant">/mo</span></p>
+        <label class="toggle-switch" title="${i.active !== false ? 'Active' : 'Inactive'}">
+          <input type="checkbox" ${i.active !== false ? 'checked' : ''} onchange="toggleSub('${i.id}', this.checked)"/>
+          <span class="toggle-slider"></span>
+        </label>
+        <button onclick="openModal('subscription','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+          <span class="material-symbols-outlined text-lg">edit</span>
+        </button>
+        <button onclick="deleteItem('subs','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-error transition-colors">
+          <span class="material-symbols-outlined text-lg">delete</span>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleSub(id, active) {
+  const item = _dataCache.subs.find(i => i.id === id);
+  if (item) { item.active = active; await dbUpsert('subs', item); }
+  await renderSubs();
+  await renderDashboard();
+}
+
+// ─── Investments CRUD ─────────────────────────────────────────────
+async function saveInvestment(e) {
+  e.preventDefault();
+  const editId = qs('#invest-edit-id').value;
+  const units = parseFloat(qs('#invest-units').value) || 0;
+  const purchasePrice = parseFloat(qs('#invest-purchase-price').value) || 0;
+  const currentValue = parseFloat(qs('#invest-current-value').value);
+  const item = {
+    id: editId || uid(),
+    name: qs('#invest-name').value,
+    assetType: qs('#invest-type').value,
+    units,
+    purchasePrice,
+    currentValue,
+    costBasis: units > 0 && purchasePrice > 0 ? units * purchasePrice : 0,
+  };
+  await dbUpsert('investments', item);
+  closeModal('investment');
+  await renderInvestments();
+  await renderDashboard();
+}
+
+const INVEST_ICONS = { Stocks: 'candlestick_chart', ETF: 'stacked_line_chart', Crypto: 'currency_bitcoin', Property: 'home_work', Bonds: 'note_stack', Cash: 'savings', Other: 'show_chart' };
+const INVEST_COLORS = { Stocks: 'bg-primary/10 text-primary', ETF: 'bg-blue-100 text-blue-700', Crypto: 'bg-yellow-100 text-yellow-700', Property: 'bg-green-100 text-green-700', Bonds: 'bg-slate-100 text-slate-700', Cash: 'bg-cyan-100 text-cyan-700', Other: 'bg-surface-container text-on-surface' };
+
+async function renderInvestments() {
+  const items = await dbLoad('investments');
+  const totalValue = items.reduce((s, i) => s + i.currentValue, 0);
+  const totalCost = items.reduce((s, i) => s + (i.costBasis || 0), 0);
+  const totalGain = totalValue - totalCost;
+  qs('#invest-total').textContent = R(totalValue);
+  qs('#invest-cost').textContent = R(totalCost);
+  const gainEl = qs('#invest-gain');
+  gainEl.textContent = (totalGain >= 0 ? '+' : '') + R(totalGain);
+  gainEl.className = 'text-2xl font-extrabold font-headline tracking-tighter ' + (totalGain >= 0 ? 'text-green-600' : 'text-error');
+  const list = qs('#invest-list');
+  if (!items.length) {
+    list.innerHTML = `<div class="bg-surface-container-low rounded-xl p-8 text-center text-on-surface-variant"><span class="material-symbols-outlined text-5xl mb-3 block opacity-30">analytics</span><p class="font-semibold">No holdings added yet</p><p class="text-sm mt-1">Track your investment portfolio by adding your holdings.</p></div>`;
+    return;
+  }
+  list.innerHTML = items.map(i => {
+    const gain = i.currentValue - (i.costBasis || 0);
+    const gainPct = i.costBasis > 0 ? (gain / i.costBasis * 100) : null;
+    const colorCls = INVEST_COLORS[i.assetType] || INVEST_COLORS.Other;
+    return `<div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-4 md:p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+      <div class="w-11 h-11 rounded-xl ${colorCls} flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined">${INVEST_ICONS[i.assetType] || 'show_chart'}</span>
+      </div>
+      <div class="flex-grow min-w-0">
+        <p class="font-bold text-on-surface truncate">${esc(i.name)}</p>
+        <div class="flex items-center gap-2 mt-0.5">
+          <span class="text-xs text-on-surface-variant">${esc(i.assetType)}</span>
+          ${i.units > 0 ? `<span class="text-xs text-on-surface-variant">· ${i.units} units</span>` : ''}
+        </div>
+      </div>
+      <div class="text-right shrink-0">
+        <p class="font-extrabold font-headline text-on-surface">${R(i.currentValue)}</p>
+        ${i.costBasis > 0 ? `<p class="text-xs font-semibold mt-0.5 ${gain >= 0 ? 'text-green-600' : 'text-error'}">${gain >= 0 ? '+' : ''}${R(gain)} ${gainPct !== null ? '(' + gainPct.toFixed(1) + '%)' : ''}</p>` : ''}
+      </div>
+      <div class="flex gap-1 shrink-0 ml-1">
+        <button onclick="openModal('investment','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+          <span class="material-symbols-outlined text-lg">edit</span>
+        </button>
+        <button onclick="deleteItem('investments','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-error transition-colors">
+          <span class="material-symbols-outlined text-lg">delete</span>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── CSV Import ───────────────────────────────────────────────────
+let csvParsedRows = [];
+
+const CSV_CATEGORIES = [
+  { keywords: ['netflix','showmax','dstv','amazon prime','apple tv'], cat: 'Streaming' },
+  { keywords: ['spotify','apple music','youtube premium','deezer'], cat: 'Music' },
+  { keywords: ['gym','virgin active','planet fitness','wellness'], cat: 'Gym' },
+  { keywords: ['shell','engen','bp','total','caltex','fuel','petrol'], cat: 'Fuel' },
+  { keywords: ['checkers','pick n pay','woolworths food','spar','shoprite','clicks','dis-chem'], cat: 'Groceries' },
+  { keywords: ['electricity','water','telkom','vodacom','mtn','cell c','rain','fibre'], cat: 'Utilities' },
+  { keywords: ['uber','taxify','bolt','myCiTi','gautrain'], cat: 'Transport' },
+  { keywords: ['salary','payroll','wages','remuneration'], cat: 'Salary' },
+  { keywords: ['discovery','momentum','sanlam','old mutual','liberty','hollard'], cat: 'Insurance' },
+  { keywords: ['adobe','microsoft','github','aws','google workspace','slack','zoom'], cat: 'Software' },
+  { keywords: ['rent','lease','bond','property'], cat: 'Rent' },
+];
+
+function autoCategory(desc) {
+  const lower = desc.toLowerCase();
+  for (const rule of CSV_CATEGORIES) {
+    if (rule.keywords.some(k => lower.includes(k))) return rule.cat;
+  }
+  return 'Other';
+}
+
+function normaliseCSV(rows, fields) {
+  // Detect bank format by column headers
+  const h = fields.map(f => f.toLowerCase().trim());
+  const has = (s) => h.some(x => x.includes(s));
+
+  let dateKey, amountKey, descKey, creditKey, debitKey;
+
+  // FNB / Nedbank style
+  if (has('date') && has('amount') && (has('description') || has('narrative'))) {
+    dateKey = fields.find(f => f.toLowerCase().includes('date'));
+    amountKey = fields.find(f => f.toLowerCase().includes('amount'));
+    descKey = fields.find(f => /description|narrative/i.test(f));
+  }
+  // Capitec style: Transaction Date, Debit, Credit, Description
+  else if (has('transaction date') || (has('debit') && has('credit'))) {
+    dateKey = fields.find(f => /date/i.test(f));
+    debitKey = fields.find(f => /debit/i.test(f));
+    creditKey = fields.find(f => /credit/i.test(f));
+    descKey = fields.find(f => /description/i.test(f));
+  }
+  // Generic fallback
+  else {
+    dateKey = fields.find(f => /date/i.test(f)) || fields[0];
+    amountKey = fields.find(f => /amount|value|total/i.test(f)) || fields.find(f => /debit|credit/i.test(f)) || fields[1];
+    descKey = fields.find(f => /desc|narr|ref|memo|detail/i.test(f)) || fields[2];
+  }
+
+  return rows.filter(r => r && Object.values(r).some(v => v && String(v).trim())).map(r => {
+    let amount = 0;
+    if (debitKey || creditKey) {
+      const debit = parseFloat(String(r[debitKey] || '0').replace(/[R,\s]/g, '')) || 0;
+      const credit = parseFloat(String(r[creditKey] || '0').replace(/[R,\s]/g, '')) || 0;
+      amount = credit > 0 ? credit : -debit;
+    } else {
+      amount = parseFloat(String(r[amountKey] || '0').replace(/[R,\s]/g, '')) || 0;
+    }
+    const desc = String(r[descKey] || '').trim();
+    return { date: String(r[dateKey] || '').trim(), description: desc, amount, category: autoCategory(desc) };
+  }).filter(r => r.description || r.amount !== 0);
+}
+
+function handleCSVUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  Papa.parse(file, {
+    header: true, skipEmptyLines: true,
+    complete: (results) => {
+      csvParsedRows = normaliseCSV(results.data, results.meta.fields || []);
+      showCSVPreview();
+    },
+    error: () => alert('Could not parse CSV. Please check the file format.')
+  });
+}
+
+function showCSVPreview() {
+  if (!csvParsedRows.length) { alert('No rows found in CSV.'); return; }
+  qs('#csv-row-count').textContent = `(${csvParsedRows.length} rows)`;
+  const tbody = qs('#csv-preview-body');
+  tbody.innerHTML = csvParsedRows.slice(0, 50).map(r => `
+    <tr class="border-b border-outline-variant/10 hover:bg-surface-container-low/50 transition-colors">
+      <td class="px-4 py-3 text-xs text-on-surface-variant">${esc(r.date)}</td>
+      <td class="px-4 py-3 text-sm max-w-[200px] truncate" title="${esc(r.description)}">${esc(r.description)}</td>
+      <td class="px-4 py-3 text-sm text-right font-semibold font-headline ${r.amount >= 0 ? 'text-green-600' : 'text-error'}">${r.amount >= 0 ? '+' : ''}${R(r.amount)}</td>
+      <td class="px-4 py-3"><span class="tag ${r.amount >= 0 ? 'tag-income' : 'tag-expense'}">${esc(r.category)}</span></td>
+    </tr>`).join('');
+  qs('#csv-preview-section').classList.remove('hidden');
+}
+
+function cancelCSV() {
+  csvParsedRows = [];
+  qs('#csv-preview-section').classList.add('hidden');
+  qs('#csv-file-input').value = '';
+}
+
+async function importCSV() {
+  if (!csvParsedRows.length) return;
+  const newTx = csvParsedRows.map(r => ({ id: uid(), ...r, source: 'csv' }));
+  await Promise.all(newTx.map(tx => dbUpsert('transactions', tx)));
+  cancelCSV();
+  await renderTransactions();
+  showToast(`Imported ${newTx.length} transactions`);
+}
+
+async function clearTransactions() {
+  if (!confirm('Clear all imported transactions? This cannot be undone.')) return;
+  if (!sb || !_userId) return;
+  await sb.from('transactions').delete().eq('user_id', _userId);
+  _dataCache.transactions = [];
+  await renderTransactions();
+}
+
+async function renderTransactions() {
+  const items = await dbLoad('transactions');
+  const btn = qs('#clear-tx-btn');
+  if (btn) btn.classList.toggle('hidden', items.length === 0);
+  const list = qs('#transactions-list');
+  if (!items.length) {
+    list.innerHTML = `<div class="bg-surface-container-low rounded-xl p-8 text-center text-on-surface-variant"><span class="material-symbols-outlined text-5xl mb-3 block opacity-30">receipt</span><p class="font-semibold">No transactions imported yet</p><p class="text-sm mt-1">Upload a CSV bank statement to import transactions.</p></div>`;
+    return;
+  }
+  // Sort by date desc
+  const sorted = [...items].sort((a, b) => new Date(b.date) - new Date(a.date));
+  list.innerHTML = `<div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl overflow-hidden shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-outline-variant/20 bg-surface-container-low">
+            <th class="text-left px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Date</th>
+            <th class="text-left px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Description</th>
+            <th class="text-right px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Amount</th>
+            <th class="text-left px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Category</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${sorted.map(r => `<tr class="border-b border-outline-variant/5 hover:bg-surface-container-low/50 transition-colors">
+            <td class="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">${esc(r.date)}</td>
+            <td class="px-4 py-3 max-w-[200px] truncate text-sm" title="${esc(r.description)}">${esc(r.description)}</td>
+            <td class="px-4 py-3 text-right font-semibold font-headline ${r.amount >= 0 ? 'text-green-600' : 'text-error'} whitespace-nowrap">${r.amount >= 0 ? '+' : ''}${R(r.amount)}</td>
+            <td class="px-4 py-3"><span class="tag ${r.amount >= 0 ? 'tag-income' : 'tag-expense'}">${esc(r.category)}</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────
+let expenseChartInstance = null;
+
+const CHART_COLORS = ['#ad2b00','#ff7853','#ff5d2f','#982400','#675949','#5b4d3e','#f0dcc8','#ffebd6','#605a57','#312e29'];
+
+async function renderDashboard() {
+  const [income, expenses, subs, investments] = await Promise.all([
+    dbLoad('income'), dbLoad('expenses'), dbLoad('subs'), dbLoad('investments')
+  ]);
+
+  const totalIncome = income.reduce((s, i) => s + toMonthly(i.amount, i.frequency), 0);
+  const totalExpenses = expenses.reduce((s, i) => s + toMonthly(i.amount, i.frequency), 0);
+  const totalSubs = subs.filter(i => i.active !== false).reduce((s, i) => s + Number(i.amount), 0);
+  const totalOutgoings = totalExpenses + totalSubs;
+  const netPosition = totalIncome - totalOutgoings;
+  const portfolioValue = investments.reduce((s, i) => s + i.currentValue, 0);
+
+  qs('#dash-total-income').textContent = R(totalIncome);
+  qs('#dash-total-expenses').textContent = R(totalOutgoings);
+  qs('#dash-total-subs').textContent = R(totalSubs);
+  qs('#dash-portfolio-value').textContent = R(portfolioValue);
+  qs('#dash-net-position').textContent = R(netPosition);
+
+  const badge = qs('#dash-net-badge');
+  if (netPosition >= 0) {
+    badge.textContent = 'Surplus';
+    badge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700';
+  } else {
+    badge.textContent = 'Deficit';
+    badge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-error/10 text-error';
+  }
+
+  // Income breakdown
+  const incomeEl = qs('#dash-income-breakdown');
+  if (!income.length) {
+    incomeEl.innerHTML = `<p class="text-sm text-on-surface-variant">No income recorded yet. <a onclick="navigate('income')" class="text-primary font-semibold cursor-pointer hover:underline">Add income →</a></p>`;
+  } else {
+    const TYPE_LABEL = { salary: 'Salary', extra: 'Extra Income', freelance: 'Freelance', rental: 'Rental', other: 'Other' };
+    incomeEl.innerHTML = income.map(i => {
+      const monthly = toMonthly(i.amount, i.frequency);
+      const pct = totalIncome > 0 ? (monthly / totalIncome * 100) : 0;
+      return `<div>
+        <div class="flex justify-between items-end mb-2">
+          <div>
+            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wide mb-0.5">${esc(TYPE_LABEL[i.type] || i.type)}</p>
+            <p class="text-2xl font-extrabold font-headline tracking-tight">${R(monthly)}</p>
+          </div>
+          <p class="text-sm font-bold text-on-surface-variant">${pct.toFixed(0)}% of total</p>
+        </div>
+        <div class="h-2.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+          <div class="h-full bg-gradient-to-r from-primary to-primary-container rounded-full progress-bar" style="width:${pct}%"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Subscriptions list
+  const subsEl = qs('#dash-subs-list');
+  const activeSubs = subs.filter(i => i.active !== false).slice(0, 6);
+  if (!activeSubs.length) {
+    subsEl.innerHTML = `<p class="text-sm text-on-surface-variant col-span-2">No subscriptions yet. <a onclick="navigate('subscriptions')" class="text-primary font-semibold cursor-pointer hover:underline">Add subscriptions →</a></p>`;
+  } else {
+    const ICON_CYCLE = ['#C45254', '#FF4D17'];
+    subsEl.innerHTML = activeSubs.map((i, idx) => {
+      const iconBg = ICON_CYCLE[idx % ICON_CYCLE.length];
+      const billingInfo = i.billingDay ? `Debit day ${i.billingDay}` : i.category;
+      return `<div class="flex items-center gap-3 p-3.5 rounded-2xl border border-outline-variant/10 hover:border-primary/20 bg-surface" style="transition: border-color 0.15s;">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background:${iconBg};">
+          <span class="material-symbols-outlined text-base" style="color:#fff;">${SUB_ICONS[i.category] || 'subscriptions'}</span>
+        </div>
+        <div class="flex-grow min-w-0">
+          <p class="text-sm font-bold truncate">${esc(i.service)}</p>
+          <p class="text-[10px] text-on-surface-variant">${esc(billingInfo)}</p>
+        </div>
+        <p class="font-bold text-sm font-headline shrink-0">${R(i.amount)}</p>
+      </div>`;
+    }).join('');
+  }
+
+  // Expense chart
+  const expenseData = {};
+  expenses.forEach(i => {
+    const m = toMonthly(i.amount, i.frequency);
+    expenseData[i.category] = (expenseData[i.category] || 0) + m;
+  });
+  // Include subs as a category
+  if (totalSubs > 0) expenseData['Subscriptions'] = totalSubs;
+
+  const cats = Object.keys(expenseData);
+  const vals = cats.map(c => expenseData[c]);
+  const chartTotal = vals.reduce((s, v) => s + v, 0);
+
+  qs('#chart-center-val').textContent = 'R\u00a0' + (chartTotal > 999 ? (chartTotal/1000).toFixed(1)+'k' : chartTotal.toFixed(0));
+
+  const canvas = qs('#expenseChart');
+  if (expenseChartInstance) { expenseChartInstance.destroy(); expenseChartInstance = null; }
+
+  if (cats.length) {
+    expenseChartInstance = new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: cats,
+        datasets: [{ data: vals, backgroundColor: CHART_COLORS.slice(0, cats.length), borderWidth: 0, hoverOffset: 6 }]
+      },
+      options: {
+        cutout: '72%', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${R(ctx.raw)}` } } }
+      }
+    });
+
+    // Legend
+    qs('#expense-legend').innerHTML = cats.map((cat, idx) => `
+      <div class="flex items-center justify-between py-1.5">
+        <div class="flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${CHART_COLORS[idx % CHART_COLORS.length]}"></div>
+          <span class="text-sm font-medium text-on-surface">${esc(cat)}</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-sm font-bold font-headline">${R(vals[idx])}</span>
+          <span class="text-xs text-on-surface-variant w-8 text-right">${chartTotal > 0 ? (vals[idx]/chartTotal*100).toFixed(0) : 0}%</span>
+        </div>
+      </div>`).join('');
+  } else {
+    qs('#expense-legend').innerHTML = `<p class="text-sm text-on-surface-variant">No expenses yet. <a onclick="navigate('expenses')" class="text-primary font-semibold cursor-pointer hover:underline">Add expenses →</a></p>`;
+  }
+
+  // Recurring Expenses list on dashboard
+  const dashExpEl = qs('#dash-expenses-list');
+  const topExpenses = [...expenses].sort((a, b) => toMonthly(b.amount, b.frequency) - toMonthly(a.amount, a.frequency)).slice(0, 5);
+  if (!topExpenses.length) {
+    dashExpEl.innerHTML = `<p class="text-sm text-on-surface-variant">No recurring expenses. <a onclick="navigate('expenses')" class="text-primary font-semibold cursor-pointer hover:underline">Add expenses →</a></p>`;
+  } else {
+    const EXP_ICON_CYCLE = ['#8B3A3C', '#C23A0E'];
+    dashExpEl.innerHTML = topExpenses.map((i, idx) => {
+      const expIconBg = EXP_ICON_CYCLE[idx % EXP_ICON_CYCLE.length];
+      return `<div class="flex items-center gap-3 p-3.5 rounded-2xl border border-outline-variant/10 hover:border-primary/20 bg-surface cursor-pointer" style="transition: border-color 0.15s;" onclick="navigate('expenses')">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background:${expIconBg};">
+          <span class="material-symbols-outlined text-base" style="color:#fff;">${EXPENSE_ICONS[i.category] || 'receipt_long'}</span>
+        </div>
+        <div class="flex-grow min-w-0">
+          <p class="text-sm font-bold truncate">${esc(i.label)}</p>
+          <p class="text-[10px] text-on-surface-variant">${esc(i.category)}</p>
+        </div>
+        <p class="font-bold text-sm font-headline shrink-0">${R(toMonthly(i.amount, i.frequency))}</p>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ─── Data Export / Import / Clear ─────────────────────────────────
+async function exportData() {
+  const [income, expenses, subs, investments, transactions] = await Promise.all([
+    dbLoad('income'), dbLoad('expenses'), dbLoad('subs'), dbLoad('investments'), dbLoad('transactions')
+  ]);
+  const data = { income, expenses, subs, investments, transactions, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `ledger-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!confirm('This will add to (not replace) your current data. Continue?')) return;
+      const ops = [];
+      if (data.income) ops.push(...data.income.map(r => dbUpsert('income', r)));
+      if (data.expenses) ops.push(...data.expenses.map(r => dbUpsert('expenses', r)));
+      if (data.subs) ops.push(...data.subs.map(r => dbUpsert('subs', r)));
+      if (data.investments) ops.push(...data.investments.map(r => dbUpsert('investments', r)));
+      if (data.transactions) ops.push(...data.transactions.map(r => dbUpsert('transactions', r)));
+      await Promise.all(ops);
+      await renderDashboard();
+      showToast('Data restored successfully');
+    } catch { showToast('Invalid backup file'); }
+  };
+  reader.readAsText(file);
+}
+
+async function clearAllData() {
+  if (!confirm('Are you sure? This will permanently delete ALL your budget data.')) return;
+  if (!confirm('This cannot be undone. Delete everything?')) return;
+  if (!sb || !_userId) return;
+  await Promise.all(Object.keys(TABLE).map(k => sb.from(TABLE[k]).delete().eq('user_id', _userId)));
+  Object.keys(_dataCache).forEach(k => _dataCache[k] = []);
+  await Promise.all([renderDashboard(), renderIncome(), renderExpenses(), renderSubs(), renderInvestments(), renderTransactions()]);
+  navigate('dashboard');
+}
+
+// ─── CSV Drag & Drop ──────────────────────────────────────────────
+const dropZone = qs('#csv-drop-zone');
+if (dropZone) {
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('csv-drop-active'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('csv-drop-active'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault(); dropZone.classList.remove('csv-drop-active');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      Papa.parse(file, { header: true, skipEmptyLines: true, complete: (results) => { csvParsedRows = normaliseCSV(results.data, results.meta.fields || []); showCSVPreview(); }, error: () => alert('Could not parse CSV.') });
+    }
+  });
+}
+
+// ─── Security: escape HTML ────────────────────────────────────────
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ─── Header Date ──────────────────────────────────────────────────
+const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const now = new Date();
+const headerMonthEl = qs('#header-month');
+if (headerMonthEl) headerMonthEl.textContent = months[now.getMonth()] + ' ' + now.getFullYear();
+
+// ─── Dark Mode ────────────────────────────────────────────────────
+function syncDarkIcons(isDark) {
+  const icon = qs('#dark-mode-icon');
+  const drawerIcon = qs('#drawer-dark-icon');
+  if (icon) icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+  if (drawerIcon) drawerIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
+}
+function toggleDarkMode() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  syncDarkIcons(isDark);
+}
+// Restore saved preference
+(function() {
+  const saved = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = saved === 'dark' || (!saved && prefersDark);
+  if (isDark) document.documentElement.classList.add('dark');
+  syncDarkIcons(isDark);
+})();
+
+// ─── Init ─────────────────────────────────────────────────────────
+let _loaderHidden = false;
+function hideLoader() {
+  if (_loaderHidden) return;
+  _loaderHidden = true;
+  const lo = qs('#loading-overlay');
+  if (lo) { lo.classList.add('fade-out'); setTimeout(() => lo.remove(), 450); }
+}
+
+// Always show UI within 1.5s regardless of Supabase
+setTimeout(() => { renderDashboard(); hideLoader(); }, 1500);
+
+(async function boot() {
+  try {
+    if (!sb) throw new Error('Supabase not configured');
+    const withTimeout = (p, ms) => Promise.race([p, new Promise((_, r) => setTimeout(() => r(new Error('timeout')), ms))]);
+
+    let { data: { session } } = await withTimeout(sb.auth.getSession(), 4000);
+    if (!session) {
+      const { data, error } = await withTimeout(sb.auth.signInAnonymously(), 4000);
+      if (error) throw error;
+      session = data.session;
+    }
+    _userId = session.user.id;
+
+    // One-time localStorage migration
+    const OLD_KEYS = { income: 'budget_income', expenses: 'budget_expenses', subs: 'budget_subscriptions', investments: 'budget_investments', transactions: 'budget_transactions' };
+    const hasLocalData = Object.values(OLD_KEYS).some(k => localStorage.getItem(k));
+    if (hasLocalData && confirm('Found local data from a previous session. Import it to the cloud?')) {
+      const ops = [];
+      for (const [cacheKey, lsKey] of Object.entries(OLD_KEYS)) {
+        const rows = JSON.parse(localStorage.getItem(lsKey) || '[]');
+        ops.push(...rows.map(r => dbUpsert(cacheKey, r)));
+      }
+      await Promise.all(ops);
+      Object.values(OLD_KEYS).forEach(k => localStorage.removeItem(k));
+      showToast('Local data imported to cloud');
+    }
+  } catch (err) {
+    console.warn('Supabase offline:', err.message);
+  }
+
+  await renderDashboard();
+  hideLoader();
+})();
+</script>
+</body>
+</html>
