@@ -1888,25 +1888,35 @@ function hideAuthScreen() {
 
 async function sendMagicLink() {
   const email = qs('#auth-email').value.trim();
-  if (!email || !sb) return;
   const btn = qs('#auth-btn');
+  if (!email) { showToast('Please enter your email'); return; }
+  if (!sb) { showToast('Connection error — please refresh'); console.error('Supabase client not initialised'); return; }
   btn.textContent = 'Sending…';
   btn.style.opacity = '0.7';
   btn.disabled = true;
-  const { error } = await sb.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: window.location.origin }
-  });
-  if (error) {
-    showToast('Could not send link — try again');
+  try {
+    const { error } = await sb.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin, shouldCreateUser: true }
+    });
+    if (error) {
+      console.error('Magic link error:', error);
+      showToast('Error: ' + (error.message || 'Could not send link'));
+      btn.textContent = 'Send Magic Link';
+      btn.style.opacity = '1';
+      btn.disabled = false;
+      return;
+    }
+    qs('#auth-form').style.display = 'none';
+    qs('#auth-sent').style.display = 'block';
+    qs('#auth-sent-to').textContent = `We sent a magic link to ${email}`;
+  } catch (e) {
+    console.error('sendMagicLink threw:', e);
+    showToast('Network error — check your connection');
     btn.textContent = 'Send Magic Link';
     btn.style.opacity = '1';
     btn.disabled = false;
-    return;
   }
-  qs('#auth-form').style.display = 'none';
-  qs('#auth-sent').style.display = 'block';
-  qs('#auth-sent-to').textContent = `We sent a magic link to ${email}`;
 }
 
 // ─── Init ─────────────────────────────────────────────────────────
