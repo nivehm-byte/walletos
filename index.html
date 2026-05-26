@@ -938,7 +938,7 @@ tailwind.config = {
 <script>
 // ─── Utilities ────────────────────────────────────────────────────
 const R = (n) => 'R\u00a0' + Number(n).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+const uid = () => crypto.randomUUID();
 const qs = (s, ctx = document) => ctx.querySelector(s);
 const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html) e.innerHTML = html; return e; };
 
