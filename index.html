@@ -1022,14 +1022,14 @@ async function dbLoad(key) {
 }
 
 async function dbUpsert(key, obj) {
-  if (!sb || !_userId) return;
+  if (!sb || !_userId) { showToast('Not signed in — please log in to save'); return; }
   const row = { ...toDb(key, obj), user_id: _userId };
   const { error } = await sb.from(TABLE[key]).upsert(row, { onConflict: 'id' });
   if (error) { showToast('Save failed — check connection'); console.error('upsert', key, error); }
 }
 
 async function dbDelete(key, id) {
-  if (!sb || !_userId) return;
+  if (!sb || !_userId) { showToast('Not signed in — please log in to save'); return; }
   const { error } = await sb.from(TABLE[key]).delete().eq('id', id).eq('user_id', _userId);
   if (error) { showToast('Delete failed — check connection'); console.error('delete', key, error); }
 }
@@ -1956,8 +1956,8 @@ if (sb) {
     }
   } catch (err) {
     console.warn('Supabase offline:', err.message);
-    await renderDashboard();
     hideLoader();
+    showAuthScreen();
   }
 })();
 </script>
