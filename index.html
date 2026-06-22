@@ -328,7 +328,7 @@ tailwind.config = {
             <div>
               <p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">net monthly position</p>
               <div class="flex items-baseline gap-3 flex-wrap">
-                <span id="dash-net-position" class="text-4xl md:text-5xl font-bold headline-text text-on-surface tracking-tight">R 0.00</span>
+                <span id="dash-net-position" class="text-3xl sm:text-4xl md:text-5xl font-bold headline-text text-on-surface tracking-tight break-words">R 0.00</span>
                 <span id="dash-net-badge" class="text-xs font-bold px-2 py-0.5 rounded-full"></span>
               </div>
             </div>
@@ -339,18 +339,18 @@ tailwind.config = {
             <p class="text-sm text-on-surface-variant">No income recorded yet. <a onclick="navigate('income')" class="text-primary font-semibold cursor-pointer hover:underline">Add income →</a></p>
           </div>
           <!-- 3-stat row -->
-          <div class="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-outline-variant/10">
-            <div>
+          <div class="grid grid-cols-3 gap-2 md:gap-4 mt-6 pt-6 border-t border-outline-variant/10">
+            <div class="min-w-0">
               <p class="text-xs text-on-surface-variant font-medium mb-1 capitalize">Income</p>
-              <p id="dash-total-income" class="text-xl font-bold headline-text">R 0.00</p>
+              <p id="dash-total-income" class="text-sm md:text-xl font-bold headline-text tracking-tight leading-tight break-words">R 0.00</p>
             </div>
-            <div>
+            <div class="min-w-0">
               <p class="text-xs text-on-surface-variant font-medium mb-1 capitalize">Outgoings</p>
-              <p id="dash-total-expenses" class="text-xl font-bold headline-text">R 0.00</p>
+              <p id="dash-total-expenses" class="text-sm md:text-xl font-bold headline-text tracking-tight leading-tight break-words">R 0.00</p>
             </div>
-            <div>
+            <div class="min-w-0">
               <p class="text-xs text-on-surface-variant font-medium mb-1 capitalize">Portfolio</p>
-              <p id="dash-portfolio-value" class="text-xl font-bold headline-text">R 0.00</p>
+              <p id="dash-portfolio-value" class="text-sm md:text-xl font-bold headline-text tracking-tight leading-tight break-words">R 0.00</p>
             </div>
           </div>
         </div>
@@ -1252,28 +1252,32 @@ async function renderIncome() {
   list.innerHTML = items.map(i => {
     const monthly = toMonthly(i.amount, i.frequency);
     const freqLabel = i.frequency.charAt(0).toUpperCase() + i.frequency.slice(1);
-    return `<div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-4 md:p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+    return `<div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-4 md:p-5 flex items-start gap-3 md:gap-4 shadow-sm hover:shadow-md transition-shadow">
       <div class="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
         <span class="material-symbols-outlined text-primary">${TYPE_ICON[i.type] || 'payments'}</span>
       </div>
       <div class="flex-grow min-w-0">
-        <p class="font-bold text-on-surface truncate">${esc(i.label)}</p>
-        <div class="flex items-center gap-2 mt-0.5">
-          <span class="tag tag-income">${TYPE_LABEL[i.type] || i.type}</span>
-          <span class="text-xs text-on-surface-variant">${freqLabel}</span>
+        <div class="flex items-start justify-between gap-2">
+          <p class="font-bold text-on-surface truncate">${esc(i.label)}</p>
+          <div class="flex gap-0.5 shrink-0 -mr-1.5 -mt-1">
+            <button onclick="openModal('income','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center transition-colors text-on-surface-variant hover:text-primary">
+              <span class="material-symbols-outlined text-lg">edit</span>
+            </button>
+            <button onclick="deleteItem('income','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center transition-colors text-on-surface-variant hover:text-error">
+              <span class="material-symbols-outlined text-lg">delete</span>
+            </button>
+          </div>
         </div>
-      </div>
-      <div class="text-right shrink-0">
-        <p class="font-extrabold font-headline text-on-surface">${R(monthly)}<span class="text-xs font-normal text-on-surface-variant">/mo</span></p>
-        ${i.frequency !== 'monthly' ? `<p class="text-xs text-on-surface-variant mt-0.5">${R(i.amount)} ${i.frequency}</p>` : ''}
-      </div>
-      <div class="flex gap-1 shrink-0 ml-1">
-        <button onclick="openModal('income','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center transition-colors text-on-surface-variant hover:text-primary">
-          <span class="material-symbols-outlined text-lg">edit</span>
-        </button>
-        <button onclick="deleteItem('income','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center transition-colors text-on-surface-variant hover:text-error">
-          <span class="material-symbols-outlined text-lg">delete</span>
-        </button>
+        <div class="flex items-end justify-between gap-2 mt-1.5">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="tag tag-income shrink-0">${TYPE_LABEL[i.type] || i.type}</span>
+            <span class="text-xs text-on-surface-variant truncate">${freqLabel}</span>
+          </div>
+          <div class="text-right shrink-0">
+            <p class="font-extrabold font-headline text-on-surface text-sm md:text-base whitespace-nowrap">${R(monthly)}<span class="text-xs font-normal text-on-surface-variant">/mo</span></p>
+            ${i.frequency !== 'monthly' ? `<p class="text-[11px] text-on-surface-variant mt-0.5 whitespace-nowrap">${R(i.amount)} ${i.frequency}</p>` : ''}
+          </div>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1327,19 +1331,21 @@ async function renderExpenses() {
       </div>
       ${catItems.map(i => {
         const monthly = toMonthly(i.amount, i.frequency);
-        return `<div class="px-5 py-3.5 flex items-center gap-3 hover:bg-surface-container-low/50 transition-colors border-b border-outline-variant/5 last:border-b-0">
-          <div class="flex-grow min-w-0">
+        return `<div class="px-5 py-3.5 hover:bg-surface-container-low/50 transition-colors border-b border-outline-variant/5 last:border-b-0">
+          <div class="flex items-start justify-between gap-2">
             <p class="font-semibold text-sm truncate">${esc(i.label)}</p>
-            <p class="text-xs text-on-surface-variant mt-0.5">${i.frequency}${i.dayOfMonth ? ` · due day ${i.dayOfMonth}` : ''}</p>
+            <div class="flex gap-0.5 shrink-0 -mr-1.5 -mt-1">
+              <button onclick="openModal('expense','${i.id}')" class="w-7 h-7 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-base">edit</span>
+              </button>
+              <button onclick="deleteItem('expenses','${i.id}')" class="w-7 h-7 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-error transition-colors">
+                <span class="material-symbols-outlined text-base">delete</span>
+              </button>
+            </div>
           </div>
-          <p class="font-bold text-sm font-headline">${R(monthly)}<span class="text-xs font-normal text-on-surface-variant">/mo</span></p>
-          <div class="flex gap-1">
-            <button onclick="openModal('expense','${i.id}')" class="w-7 h-7 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
-              <span class="material-symbols-outlined text-base">edit</span>
-            </button>
-            <button onclick="deleteItem('expenses','${i.id}')" class="w-7 h-7 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-error transition-colors">
-              <span class="material-symbols-outlined text-base">delete</span>
-            </button>
+          <div class="flex items-end justify-between gap-2 mt-0.5">
+            <p class="text-xs text-on-surface-variant truncate min-w-0">${i.frequency}${i.dayOfMonth ? ` · due day ${i.dayOfMonth}` : ''}</p>
+            <p class="font-bold text-sm font-headline shrink-0 whitespace-nowrap">${R(monthly)}<span class="text-xs font-normal text-on-surface-variant">/mo</span></p>
           </div>
         </div>`;
       }).join('')}
@@ -1379,29 +1385,30 @@ async function renderSubs() {
   }
   list.innerHTML = items.map(i => {
     const colorCls = SUB_COLORS[i.category] || SUB_COLORS.Other;
-    return `<div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow ${i.active === false ? 'opacity-50' : ''}">
+    return `<div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-4 flex items-start gap-3 md:gap-4 shadow-sm hover:shadow-md transition-shadow ${i.active === false ? 'opacity-50' : ''}">
       <div class="w-11 h-11 rounded-xl ${colorCls} flex items-center justify-center shrink-0">
         <span class="material-symbols-outlined">${SUB_ICONS[i.category] || 'subscriptions'}</span>
       </div>
       <div class="flex-grow min-w-0">
-        <p class="font-bold text-on-surface truncate">${esc(i.service)}</p>
-        <div class="flex items-center gap-2 mt-0.5">
-          <span class="text-xs text-on-surface-variant">${esc(i.category)}</span>
-          ${i.billingDay ? `<span class="text-xs text-on-surface-variant">· Debit day ${i.billingDay}</span>` : ''}
+        <div class="flex items-start justify-between gap-2">
+          <p class="font-bold text-on-surface truncate">${esc(i.service)}</p>
+          <div class="flex items-center gap-1 shrink-0 -mr-1 -mt-0.5">
+            <label class="toggle-switch" title="${i.active !== false ? 'Active' : 'Inactive'}">
+              <input type="checkbox" ${i.active !== false ? 'checked' : ''} onchange="toggleSub('${i.id}', this.checked)"/>
+              <span class="toggle-slider"></span>
+            </label>
+            <button onclick="openModal('subscription','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-lg">edit</span>
+            </button>
+            <button onclick="deleteItem('subs','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-error transition-colors">
+              <span class="material-symbols-outlined text-lg">delete</span>
+            </button>
+          </div>
         </div>
-      </div>
-      <div class="flex items-center gap-3 shrink-0">
-        <p class="font-extrabold font-headline text-on-surface">${R(i.amount)}<span class="text-xs font-normal text-on-surface-variant">/mo</span></p>
-        <label class="toggle-switch" title="${i.active !== false ? 'Active' : 'Inactive'}">
-          <input type="checkbox" ${i.active !== false ? 'checked' : ''} onchange="toggleSub('${i.id}', this.checked)"/>
-          <span class="toggle-slider"></span>
-        </label>
-        <button onclick="openModal('subscription','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
-          <span class="material-symbols-outlined text-lg">edit</span>
-        </button>
-        <button onclick="deleteItem('subs','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-error transition-colors">
-          <span class="material-symbols-outlined text-lg">delete</span>
-        </button>
+        <div class="flex items-end justify-between gap-2 mt-1.5">
+          <p class="text-xs text-on-surface-variant truncate min-w-0">${esc(i.category)}${i.billingDay ? ` · Debit day ${i.billingDay}` : ''}</p>
+          <p class="font-extrabold font-headline text-on-surface text-sm md:text-base shrink-0 whitespace-nowrap">${R(i.amount)}<span class="text-xs font-normal text-on-surface-variant">/mo</span></p>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1458,28 +1465,29 @@ async function renderInvestments() {
     const gain = i.currentValue - (i.costBasis || 0);
     const gainPct = i.costBasis > 0 ? (gain / i.costBasis * 100) : null;
     const colorCls = INVEST_COLORS[i.assetType] || INVEST_COLORS.Other;
-    return `<div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-4 md:p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+    return `<div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-4 md:p-5 flex items-start gap-3 md:gap-4 shadow-sm hover:shadow-md transition-shadow">
       <div class="w-11 h-11 rounded-xl ${colorCls} flex items-center justify-center shrink-0">
         <span class="material-symbols-outlined">${INVEST_ICONS[i.assetType] || 'show_chart'}</span>
       </div>
       <div class="flex-grow min-w-0">
-        <p class="font-bold text-on-surface truncate">${esc(i.name)}</p>
-        <div class="flex items-center gap-2 mt-0.5">
-          <span class="text-xs text-on-surface-variant">${esc(i.assetType)}</span>
-          ${i.units > 0 ? `<span class="text-xs text-on-surface-variant">· ${i.units} units</span>` : ''}
+        <div class="flex items-start justify-between gap-2">
+          <p class="font-bold text-on-surface truncate">${esc(i.name)}</p>
+          <div class="flex gap-0.5 shrink-0 -mr-1.5 -mt-1">
+            <button onclick="openModal('investment','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-lg">edit</span>
+            </button>
+            <button onclick="deleteItem('investments','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-error transition-colors">
+              <span class="material-symbols-outlined text-lg">delete</span>
+            </button>
+          </div>
         </div>
-      </div>
-      <div class="text-right shrink-0">
-        <p class="font-extrabold font-headline text-on-surface">${R(i.currentValue)}</p>
-        ${i.costBasis > 0 ? `<p class="text-xs font-semibold mt-0.5 ${gain >= 0 ? 'text-green-600' : 'text-error'}">${gain >= 0 ? '+' : ''}${R(gain)} ${gainPct !== null ? '(' + gainPct.toFixed(1) + '%)' : ''}</p>` : ''}
-      </div>
-      <div class="flex gap-1 shrink-0 ml-1">
-        <button onclick="openModal('investment','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
-          <span class="material-symbols-outlined text-lg">edit</span>
-        </button>
-        <button onclick="deleteItem('investments','${i.id}')" class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-error transition-colors">
-          <span class="material-symbols-outlined text-lg">delete</span>
-        </button>
+        <div class="flex items-end justify-between gap-2 mt-1.5">
+          <p class="text-xs text-on-surface-variant truncate min-w-0">${esc(i.assetType)}${i.units > 0 ? ` · ${i.units} units` : ''}</p>
+          <div class="text-right shrink-0">
+            <p class="font-extrabold font-headline text-on-surface text-sm md:text-base whitespace-nowrap">${R(i.currentValue)}</p>
+            ${i.costBasis > 0 ? `<p class="text-[11px] font-semibold mt-0.5 whitespace-nowrap ${gain >= 0 ? 'text-green-600' : 'text-error'}">${gain >= 0 ? '+' : ''}${R(gain)} ${gainPct !== null ? '(' + gainPct.toFixed(1) + '%)' : ''}</p>` : ''}
+          </div>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1612,28 +1620,41 @@ async function renderTransactions() {
   }
   // Sort by date desc
   const sorted = [...items].sort((a, b) => new Date(b.date) - new Date(a.date));
-  list.innerHTML = `<div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl overflow-hidden shadow-sm">
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="border-b border-outline-variant/20 bg-surface-container-low">
-            <th class="text-left px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Date</th>
-            <th class="text-left px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Description</th>
-            <th class="text-right px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Amount</th>
-            <th class="text-left px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Category</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${sorted.map(r => `<tr class="border-b border-outline-variant/5 hover:bg-surface-container-low/50 transition-colors">
-            <td class="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">${esc(r.date)}</td>
-            <td class="px-4 py-3 max-w-[200px] truncate text-sm" title="${esc(r.description)}">${esc(r.description)}</td>
-            <td class="px-4 py-3 text-right font-semibold font-headline ${r.amount >= 0 ? 'text-green-600' : 'text-error'} whitespace-nowrap">${r.amount >= 0 ? '+' : ''}${R(r.amount)}</td>
-            <td class="px-4 py-3"><span class="tag ${r.amount >= 0 ? 'tag-income' : 'tag-expense'}">${esc(r.category)}</span></td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
+  list.innerHTML = `
+    <div class="md:hidden flex flex-col gap-2">
+      ${sorted.map(r => `<div class="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-3.5 shadow-sm">
+        <div class="flex items-start justify-between gap-3">
+          <p class="font-semibold text-sm truncate min-w-0" title="${esc(r.description)}">${esc(r.description)}</p>
+          <p class="font-bold text-sm font-headline shrink-0 whitespace-nowrap ${r.amount >= 0 ? 'text-green-600' : 'text-error'}">${r.amount >= 0 ? '+' : ''}${R(r.amount)}</p>
+        </div>
+        <div class="flex items-center justify-between gap-2 mt-1.5">
+          <span class="text-xs text-on-surface-variant whitespace-nowrap">${esc(r.date)}</span>
+          <span class="tag ${r.amount >= 0 ? 'tag-income' : 'tag-expense'} shrink-0">${esc(r.category)}</span>
+        </div>
+      </div>`).join('')}
     </div>
-  </div>`;
+    <div class="hidden md:block bg-surface-container-lowest border border-outline-variant/10 rounded-xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-outline-variant/20 bg-surface-container-low">
+              <th class="text-left px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Date</th>
+              <th class="text-left px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Description</th>
+              <th class="text-right px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Amount</th>
+              <th class="text-left px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Category</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${sorted.map(r => `<tr class="border-b border-outline-variant/5 hover:bg-surface-container-low/50 transition-colors">
+              <td class="px-4 py-3 text-xs text-on-surface-variant whitespace-nowrap">${esc(r.date)}</td>
+              <td class="px-4 py-3 max-w-[200px] truncate text-sm" title="${esc(r.description)}">${esc(r.description)}</td>
+              <td class="px-4 py-3 text-right font-semibold font-headline ${r.amount >= 0 ? 'text-green-600' : 'text-error'} whitespace-nowrap">${r.amount >= 0 ? '+' : ''}${R(r.amount)}</td>
+              <td class="px-4 py-3"><span class="tag ${r.amount >= 0 ? 'tag-income' : 'tag-expense'}">${esc(r.category)}</span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
 }
 
 // ─── Dashboard ────────────────────────────────────────────────────
